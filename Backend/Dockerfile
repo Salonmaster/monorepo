@@ -1,6 +1,8 @@
 FROM alpine:3.21 AS builder
 
 RUN apk add --no-cache \
+    bash \
+    meson \
     build-base \
     cmake \
     git \
