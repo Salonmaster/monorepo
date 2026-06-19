@@ -12,9 +12,9 @@
  */
 
 /// @brief Standard library includes for byte vectors, strings, and fixed-width integers.
-#include <vector>
-#include <string>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace Helpers {
 
@@ -66,4 +66,4 @@ public:
     std::string decrypt(const std::string& ciphertext) const;
 };
 
-} // namespace Helpers
+}  // namespace Helpers

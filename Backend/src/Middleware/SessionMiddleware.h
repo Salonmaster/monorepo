@@ -1,15 +1,12 @@
-#include <drogon/drogon.h>
-#include <Helpers/SessionCrypto.h>
 #include <Helpers/KeyDeriver.h>
-class SessionMiddleware : public drogon::HttpMiddleware<SessionMiddleware>
-{
+#include <Helpers/SessionCrypto.h>
+#include <drogon/drogon.h>
+class SessionMiddleware : public drogon::HttpMiddleware<SessionMiddleware> {
 public:
-    SessionMiddleware(){};  // do not omit constructor
+    SessionMiddleware() {};  // do not omit constructor
 
-    void invoke(const drogon::HttpRequestPtr &req,
-                drogon::MiddlewareNextCallback &&nextCb,
-                drogon::MiddlewareCallback &&mcb) override
-    {
+    void invoke(const drogon::HttpRequestPtr& req, drogon::MiddlewareNextCallback&& nextCb,
+                drogon::MiddlewareCallback&& mcb) override {
         auto session_cookie = req->getCookie("session");
         if (session_cookie.empty()) {
             mcb(drogon::HttpResponse::newHttpResponse(drogon::k401Unauthorized, drogon::CT_TEXT_PLAIN));
@@ -34,27 +31,25 @@ public:
             auto sessionMapper = drogon::orm::Mapper<drogon_model::backend::Sessions>(dbClient);
             sessionMapper.findByPrimaryKey(
                 decryptedSession,
-                [mcb, req, nextCb](const drogon_model::backend::Sessions &session) mutable {
+                [mcb, req, nextCb](const drogon_model::backend::Sessions& session) mutable {
                     // If session is found, attach it to the request
                     req->attributes()->insert("session", std::make_shared<drogon_model::backend::Sessions>(session));
-                    nextCb([req, mcb = std::move(mcb)](const drogon::HttpResponsePtr &resp) {
+                    nextCb([req, mcb = std::move(mcb)](const drogon::HttpResponsePtr& resp) {
                         // Do something after the next middleware returns
                         mcb(resp);
                     });
                 },
-                [mcb](const drogon::orm::DrogonDbException &e) mutable {
+                [mcb](const drogon::orm::DrogonDbException& e) mutable {
                     spdlog::warn("Session not found or DB error: {}", e.base().what());
                     mcb(drogon::HttpResponse::newHttpResponse(drogon::k401Unauthorized, drogon::CT_TEXT_PLAIN));
                     return;
-                }
-            );
+                });
 
-        } catch (const std::exception &e) {
+        } catch (const std::exception& e) {
             spdlog::warn("Failed to decrypt session cookie: {}", e.what());
             mcb(drogon::HttpResponse::newHttpResponse(drogon::k401Unauthorized, drogon::CT_TEXT_PLAIN));
             return;
         }
         // If session cookie is present, continue with the next middleware
-
     }
 };

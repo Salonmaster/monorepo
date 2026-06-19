@@ -6,44 +6,39 @@
  */
 
 #pragma once
+#include <drogon/orm/BaseBuilder.h>
+#include <drogon/orm/Field.h>
+#include <drogon/orm/Mapper.h>
 #include <drogon/orm/Result.h>
 #include <drogon/orm/Row.h>
-#include <drogon/orm/Field.h>
 #include <drogon/orm/SqlBinder.h>
-#include <drogon/orm/Mapper.h>
-#include <drogon/orm/BaseBuilder.h>
 #ifdef __cpp_impl_coroutine
 #include <drogon/orm/CoroMapper.h>
 #endif
+#include <json/json.h>
+#include <stdint.h>
 #include <trantor/utils/Date.h>
 #include <trantor/utils/Logger.h>
-#include <json/json.h>
+
+#include <iostream>
+#include <memory>
 #include <string>
 #include <string_view>
-#include <memory>
-#include <vector>
 #include <tuple>
-#include <stdint.h>
-#include <iostream>
+#include <vector>
 
-namespace drogon
-{
-namespace orm
-{
+namespace drogon {
+namespace orm {
 class DbClient;
 using DbClientPtr = std::shared_ptr<DbClient>;
-}
-}
-namespace drogon_model
-{
-namespace backend
-{
+}  // namespace orm
+}  // namespace drogon
+namespace drogon_model {
+namespace backend {
 
-class Sessions
-{
-  public:
-    struct Cols
-    {
+class Sessions {
+public:
+    struct Cols {
         static const std::string _id;
         static const std::string _verifier;
         static const std::string _code_challenge;
@@ -65,7 +60,7 @@ class Sessions
     static const bool hasPrimaryKey;
     static const std::string primaryKeyName;
     using PrimaryKeyType = std::string;
-    const PrimaryKeyType &getPrimaryKey() const;
+    const PrimaryKeyType& getPrimaryKey() const;
 
     /**
      * @brief constructor
@@ -75,178 +70,189 @@ class Sessions
      * @note If the SQL is not a style of 'select * from table_name ...' (select all
      * columns by an asterisk), please set the offset to -1.
      */
-    explicit Sessions(const drogon::orm::Row &r, const ssize_t indexOffset = 0) noexcept;
+    explicit Sessions(const drogon::orm::Row& r, const ssize_t indexOffset = 0) noexcept;
 
     /**
      * @brief constructor
      * @param pJson The json object to construct a new instance.
      */
-    explicit Sessions(const Json::Value &pJson) noexcept(false);
+    explicit Sessions(const Json::Value& pJson) noexcept(false);
 
     /**
      * @brief constructor
      * @param pJson The json object to construct a new instance.
      * @param pMasqueradingVector The aliases of table columns.
      */
-    Sessions(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false);
+    Sessions(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false);
 
     Sessions() = default;
 
-    void updateByJson(const Json::Value &pJson) noexcept(false);
-    void updateByMasqueradedJson(const Json::Value &pJson,
-                                 const std::vector<std::string> &pMasqueradingVector) noexcept(false);
-    static bool validateJsonForCreation(const Json::Value &pJson, std::string &err);
-    static bool validateMasqueradedJsonForCreation(const Json::Value &,
-                                                const std::vector<std::string> &pMasqueradingVector,
-                                                    std::string &err);
-    static bool validateJsonForUpdate(const Json::Value &pJson, std::string &err);
-    static bool validateMasqueradedJsonForUpdate(const Json::Value &,
-                                          const std::vector<std::string> &pMasqueradingVector,
-                                          std::string &err);
-    static bool validJsonOfField(size_t index,
-                          const std::string &fieldName,
-                          const Json::Value &pJson,
-                          std::string &err,
-                          bool isForCreation);
+    void updateByJson(const Json::Value& pJson) noexcept(false);
+    void updateByMasqueradedJson(const Json::Value& pJson,
+                                 const std::vector<std::string>& pMasqueradingVector) noexcept(false);
+    static bool validateJsonForCreation(const Json::Value& pJson, std::string& err);
+    static bool validateMasqueradedJsonForCreation(const Json::Value&,
+                                                   const std::vector<std::string>& pMasqueradingVector,
+                                                   std::string& err);
+    static bool validateJsonForUpdate(const Json::Value& pJson, std::string& err);
+    static bool validateMasqueradedJsonForUpdate(const Json::Value&,
+                                                 const std::vector<std::string>& pMasqueradingVector, std::string& err);
+    static bool validJsonOfField(size_t index, const std::string& fieldName, const Json::Value& pJson, std::string& err,
+                                 bool isForCreation);
 
     /**  For column id  */
-    ///Get the value of the column id, returns the default value if the column is null
-    const std::string &getValueOfId() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getId() const noexcept;
-    ///Set the value of the column id
-    void setId(const std::string &pId) noexcept;
-    void setId(std::string &&pId) noexcept;
+    /// Get the value of the column id, returns the default value if the column is null
+    const std::string& getValueOfId() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getId() const noexcept;
+    /// Set the value of the column id
+    void setId(const std::string& pId) noexcept;
+    void setId(std::string&& pId) noexcept;
 
     /**  For column verifier  */
-    ///Get the value of the column verifier, returns the default value if the column is null
-    const std::string &getValueOfVerifier() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getVerifier() const noexcept;
-    ///Set the value of the column verifier
-    void setVerifier(const std::string &pVerifier) noexcept;
-    void setVerifier(std::string &&pVerifier) noexcept;
+    /// Get the value of the column verifier, returns the default value if the column is null
+    const std::string& getValueOfVerifier() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getVerifier() const noexcept;
+    /// Set the value of the column verifier
+    void setVerifier(const std::string& pVerifier) noexcept;
+    void setVerifier(std::string&& pVerifier) noexcept;
 
     /**  For column code_challenge  */
-    ///Get the value of the column code_challenge, returns the default value if the column is null
-    const std::string &getValueOfCodeChallenge() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getCodeChallenge() const noexcept;
-    ///Set the value of the column code_challenge
-    void setCodeChallenge(const std::string &pCodeChallenge) noexcept;
-    void setCodeChallenge(std::string &&pCodeChallenge) noexcept;
+    /// Get the value of the column code_challenge, returns the default value if the column is null
+    const std::string& getValueOfCodeChallenge() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getCodeChallenge() const noexcept;
+    /// Set the value of the column code_challenge
+    void setCodeChallenge(const std::string& pCodeChallenge) noexcept;
+    void setCodeChallenge(std::string&& pCodeChallenge) noexcept;
 
     /**  For column code_challenge_method  */
-    ///Get the value of the column code_challenge_method, returns the default value if the column is null
-    const std::string &getValueOfCodeChallengeMethod() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getCodeChallengeMethod() const noexcept;
-    ///Set the value of the column code_challenge_method
-    void setCodeChallengeMethod(const std::string &pCodeChallengeMethod) noexcept;
-    void setCodeChallengeMethod(std::string &&pCodeChallengeMethod) noexcept;
+    /// Get the value of the column code_challenge_method, returns the default value if the column is null
+    const std::string& getValueOfCodeChallengeMethod() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getCodeChallengeMethod() const noexcept;
+    /// Set the value of the column code_challenge_method
+    void setCodeChallengeMethod(const std::string& pCodeChallengeMethod) noexcept;
+    void setCodeChallengeMethod(std::string&& pCodeChallengeMethod) noexcept;
 
     /**  For column created_at  */
-    ///Get the value of the column created_at, returns the default value if the column is null
-    const ::trantor::Date &getValueOfCreatedAt() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<::trantor::Date> &getCreatedAt() const noexcept;
-    ///Set the value of the column created_at
-    void setCreatedAt(const ::trantor::Date &pCreatedAt) noexcept;
+    /// Get the value of the column created_at, returns the default value if the column is null
+    const ::trantor::Date& getValueOfCreatedAt() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<::trantor::Date>& getCreatedAt() const noexcept;
+    /// Set the value of the column created_at
+    void setCreatedAt(const ::trantor::Date& pCreatedAt) noexcept;
 
     /**  For column access_token  */
-    ///Get the value of the column access_token, returns the default value if the column is null
-    const std::string &getValueOfAccessToken() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getAccessToken() const noexcept;
-    ///Set the value of the column access_token
-    void setAccessToken(const std::string &pAccessToken) noexcept;
-    void setAccessToken(std::string &&pAccessToken) noexcept;
+    /// Get the value of the column access_token, returns the default value if the column is null
+    const std::string& getValueOfAccessToken() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getAccessToken() const noexcept;
+    /// Set the value of the column access_token
+    void setAccessToken(const std::string& pAccessToken) noexcept;
+    void setAccessToken(std::string&& pAccessToken) noexcept;
     void setAccessTokenToNull() noexcept;
 
     /**  For column expires_in  */
-    ///Get the value of the column expires_in, returns the default value if the column is null
-    const int32_t &getValueOfExpiresIn() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getExpiresIn() const noexcept;
-    ///Set the value of the column expires_in
-    void setExpiresIn(const int32_t &pExpiresIn) noexcept;
+    /// Get the value of the column expires_in, returns the default value if the column is null
+    const int32_t& getValueOfExpiresIn() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<int32_t>& getExpiresIn() const noexcept;
+    /// Set the value of the column expires_in
+    void setExpiresIn(const int32_t& pExpiresIn) noexcept;
     void setExpiresInToNull() noexcept;
 
     /**  For column refresh_expires_in  */
-    ///Get the value of the column refresh_expires_in, returns the default value if the column is null
-    const int32_t &getValueOfRefreshExpiresIn() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getRefreshExpiresIn() const noexcept;
-    ///Set the value of the column refresh_expires_in
-    void setRefreshExpiresIn(const int32_t &pRefreshExpiresIn) noexcept;
+    /// Get the value of the column refresh_expires_in, returns the default value if the column is null
+    const int32_t& getValueOfRefreshExpiresIn() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<int32_t>& getRefreshExpiresIn() const noexcept;
+    /// Set the value of the column refresh_expires_in
+    void setRefreshExpiresIn(const int32_t& pRefreshExpiresIn) noexcept;
     void setRefreshExpiresInToNull() noexcept;
 
     /**  For column refresh_token  */
-    ///Get the value of the column refresh_token, returns the default value if the column is null
-    const std::string &getValueOfRefreshToken() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getRefreshToken() const noexcept;
-    ///Set the value of the column refresh_token
-    void setRefreshToken(const std::string &pRefreshToken) noexcept;
-    void setRefreshToken(std::string &&pRefreshToken) noexcept;
+    /// Get the value of the column refresh_token, returns the default value if the column is null
+    const std::string& getValueOfRefreshToken() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getRefreshToken() const noexcept;
+    /// Set the value of the column refresh_token
+    void setRefreshToken(const std::string& pRefreshToken) noexcept;
+    void setRefreshToken(std::string&& pRefreshToken) noexcept;
     void setRefreshTokenToNull() noexcept;
 
     /**  For column token_type  */
-    ///Get the value of the column token_type, returns the default value if the column is null
-    const std::string &getValueOfTokenType() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getTokenType() const noexcept;
-    ///Set the value of the column token_type
-    void setTokenType(const std::string &pTokenType) noexcept;
-    void setTokenType(std::string &&pTokenType) noexcept;
+    /// Get the value of the column token_type, returns the default value if the column is null
+    const std::string& getValueOfTokenType() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getTokenType() const noexcept;
+    /// Set the value of the column token_type
+    void setTokenType(const std::string& pTokenType) noexcept;
+    void setTokenType(std::string&& pTokenType) noexcept;
     void setTokenTypeToNull() noexcept;
 
     /**  For column not_before_policy  */
-    ///Get the value of the column not_before_policy, returns the default value if the column is null
-    const int32_t &getValueOfNotBeforePolicy() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<int32_t> &getNotBeforePolicy() const noexcept;
-    ///Set the value of the column not_before_policy
-    void setNotBeforePolicy(const int32_t &pNotBeforePolicy) noexcept;
+    /// Get the value of the column not_before_policy, returns the default value if the column is null
+    const int32_t& getValueOfNotBeforePolicy() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<int32_t>& getNotBeforePolicy() const noexcept;
+    /// Set the value of the column not_before_policy
+    void setNotBeforePolicy(const int32_t& pNotBeforePolicy) noexcept;
     void setNotBeforePolicyToNull() noexcept;
 
     /**  For column session_state  */
-    ///Get the value of the column session_state, returns the default value if the column is null
-    const std::string &getValueOfSessionState() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getSessionState() const noexcept;
-    ///Set the value of the column session_state
-    void setSessionState(const std::string &pSessionState) noexcept;
-    void setSessionState(std::string &&pSessionState) noexcept;
+    /// Get the value of the column session_state, returns the default value if the column is null
+    const std::string& getValueOfSessionState() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getSessionState() const noexcept;
+    /// Set the value of the column session_state
+    void setSessionState(const std::string& pSessionState) noexcept;
+    void setSessionState(std::string&& pSessionState) noexcept;
     void setSessionStateToNull() noexcept;
 
     /**  For column scope  */
-    ///Get the value of the column scope, returns the default value if the column is null
-    const std::string &getValueOfScope() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getScope() const noexcept;
-    ///Set the value of the column scope
-    void setScope(const std::string &pScope) noexcept;
-    void setScope(std::string &&pScope) noexcept;
+    /// Get the value of the column scope, returns the default value if the column is null
+    const std::string& getValueOfScope() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getScope() const noexcept;
+    /// Set the value of the column scope
+    void setScope(const std::string& pScope) noexcept;
+    void setScope(std::string&& pScope) noexcept;
     void setScopeToNull() noexcept;
 
     /**  For column expires_at  */
-    ///Get the value of the column expires_at, returns the default value if the column is null
-    const ::trantor::Date &getValueOfExpiresAt() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<::trantor::Date> &getExpiresAt() const noexcept;
-    ///Set the value of the column expires_at
-    void setExpiresAt(const ::trantor::Date &pExpiresAt) noexcept;
+    /// Get the value of the column expires_at, returns the default value if the column is null
+    const ::trantor::Date& getValueOfExpiresAt() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<::trantor::Date>& getExpiresAt() const noexcept;
+    /// Set the value of the column expires_at
+    void setExpiresAt(const ::trantor::Date& pExpiresAt) noexcept;
     void setExpiresAtToNull() noexcept;
 
-
-    static size_t getColumnNumber() noexcept {  return 14;  }
-    static const std::string &getColumnName(size_t index) noexcept(false);
+    static size_t getColumnNumber() noexcept {
+        return 14;
+    }
+    static const std::string& getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
-    Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
+    Json::Value toMasqueradedJson(const std::vector<std::string>& pMasqueradingVector) const;
     /// Relationship interfaces
-  private:
+private:
     friend drogon::orm::Mapper<Sessions>;
     friend drogon::orm::BaseBuilder<Sessions, true, true>;
     friend drogon::orm::BaseBuilder<Sessions, true, false>;
@@ -255,11 +261,11 @@ class Sessions
 #ifdef __cpp_impl_coroutine
     friend drogon::orm::CoroMapper<Sessions>;
 #endif
-    static const std::vector<std::string> &insertColumns() noexcept;
-    void outputArgs(drogon::orm::internal::SqlBinder &binder) const;
+    static const std::vector<std::string>& insertColumns() noexcept;
+    void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
-    void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
-    ///For mysql or sqlite3
+    void updateArgs(drogon::orm::internal::SqlBinder& binder) const;
+    /// For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<std::string> id_;
     std::shared_ptr<std::string> verifier_;
@@ -275,8 +281,7 @@ class Sessions
     std::shared_ptr<std::string> sessionState_;
     std::shared_ptr<std::string> scope_;
     std::shared_ptr<::trantor::Date> expiresAt_;
-    struct MetaData
-    {
+    struct MetaData {
         const std::string colName_;
         const std::string colType_;
         const std::string colDatabaseType_;
@@ -286,200 +291,160 @@ class Sessions
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[14]={ false };
-  public:
-    static const std::string &sqlForFindingByPrimaryKey()
-    {
-        static const std::string sql="select * from " + tableName + " where id = $1";
+    bool dirtyFlag_[14] = {false};
+
+public:
+    static const std::string& sqlForFindingByPrimaryKey() {
+        static const std::string sql = "select * from " + tableName + " where id = $1";
         return sql;
     }
 
-    static const std::string &sqlForDeletingByPrimaryKey()
-    {
-        static const std::string sql="delete from " + tableName + " where id = $1";
+    static const std::string& sqlForDeletingByPrimaryKey() {
+        static const std::string sql = "delete from " + tableName + " where id = $1";
         return sql;
     }
-    std::string sqlForInserting(bool &needSelection) const
-    {
-        std::string sql="insert into " + tableName + " (";
+    std::string sqlForInserting(bool& needSelection) const {
+        std::string sql = "insert into " + tableName + " (";
         size_t parametersCount = 0;
         needSelection = false;
         sql += "id,";
         ++parametersCount;
-        if(!dirtyFlag_[0])
-        {
-            needSelection=true;
+        if (!dirtyFlag_[0]) {
+            needSelection = true;
         }
-        if(dirtyFlag_[1])
-        {
+        if (dirtyFlag_[1]) {
             sql += "verifier,";
             ++parametersCount;
         }
-        if(dirtyFlag_[2])
-        {
+        if (dirtyFlag_[2]) {
             sql += "code_challenge,";
             ++parametersCount;
         }
-        if(dirtyFlag_[3])
-        {
+        if (dirtyFlag_[3]) {
             sql += "code_challenge_method,";
             ++parametersCount;
         }
         sql += "created_at,";
         ++parametersCount;
-        if(!dirtyFlag_[4])
-        {
-            needSelection=true;
+        if (!dirtyFlag_[4]) {
+            needSelection = true;
         }
-        if(dirtyFlag_[5])
-        {
+        if (dirtyFlag_[5]) {
             sql += "access_token,";
             ++parametersCount;
         }
-        if(dirtyFlag_[6])
-        {
+        if (dirtyFlag_[6]) {
             sql += "expires_in,";
             ++parametersCount;
         }
-        if(dirtyFlag_[7])
-        {
+        if (dirtyFlag_[7]) {
             sql += "refresh_expires_in,";
             ++parametersCount;
         }
-        if(dirtyFlag_[8])
-        {
+        if (dirtyFlag_[8]) {
             sql += "refresh_token,";
             ++parametersCount;
         }
-        if(dirtyFlag_[9])
-        {
+        if (dirtyFlag_[9]) {
             sql += "token_type,";
             ++parametersCount;
         }
-        if(dirtyFlag_[10])
-        {
+        if (dirtyFlag_[10]) {
             sql += "not_before_policy,";
             ++parametersCount;
         }
-        if(dirtyFlag_[11])
-        {
+        if (dirtyFlag_[11]) {
             sql += "session_state,";
             ++parametersCount;
         }
-        if(dirtyFlag_[12])
-        {
+        if (dirtyFlag_[12]) {
             sql += "scope,";
             ++parametersCount;
         }
-        if(dirtyFlag_[13])
-        {
+        if (dirtyFlag_[13]) {
             sql += "expires_at,";
             ++parametersCount;
         }
-        if(parametersCount > 0)
-        {
-            sql[sql.length()-1]=')';
+        if (parametersCount > 0) {
+            sql[sql.length() - 1] = ')';
             sql += " values (";
-        }
-        else
+        } else
             sql += ") values (";
 
-        int placeholder=1;
+        int placeholder = 1;
         char placeholderStr[64];
-        size_t n=0;
-        if(dirtyFlag_[0])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        size_t n = 0;
+        if (dirtyFlag_[0]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        } else {
+            sql += "default,";
+        }
+        if (dirtyFlag_[1]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[1])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[2]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[2])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[3]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[3])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[4]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        } else {
+            sql += "default,";
+        }
+        if (dirtyFlag_[5]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[4])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[6]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[5])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[7]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[6])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[8]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[7])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[9]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[8])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[10]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[9])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[11]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[10])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[12]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[11])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[13]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[12])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        if(dirtyFlag_[13])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        if(parametersCount > 0)
-        {
+        if (parametersCount > 0) {
             sql.resize(sql.length() - 1);
         }
-        if(needSelection)
-        {
+        if (needSelection) {
             sql.append(") returning *");
-        }
-        else
-        {
+        } else {
             sql.append(1, ')');
         }
         LOG_TRACE << sql;
         return sql;
     }
 };
-} // namespace backend
-} // namespace drogon_model
+}  // namespace backend
+}  // namespace drogon_model

@@ -1,7 +1,9 @@
 // SecureMasterKey.cpp
 #include "SecureMasterKey.h"
+
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+
 #include <cstring>
 #include <stdexcept>
 
@@ -32,8 +34,7 @@ void Types::SecureMasterKey::encryptInMemory(const std::string& plain) {
     EVP_EncryptInit_ex(ctx, EVP_aes_256_ctr(), nullptr, tempKey_.data(), iv_.data());
 
     int len;
-    EVP_EncryptUpdate(ctx, encrypted_.data(), &len,
-                      reinterpret_cast<const unsigned char*>(plain.data()), plain.size());
+    EVP_EncryptUpdate(ctx, encrypted_.data(), &len, reinterpret_cast<const unsigned char*>(plain.data()), plain.size());
     EVP_EncryptFinal_ex(ctx, encrypted_.data() + len, &len);
 
     EVP_CIPHER_CTX_free(ctx);

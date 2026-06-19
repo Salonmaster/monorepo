@@ -1,12 +1,14 @@
 // SessionCrypto.cpp
 #include "SessionCrypto.h"
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-#include <openssl/hmac.h>
+
 #include <drogon/utils/Utilities.h>
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/rand.h>
+
+#include <cstring>
 #include <stdexcept>
 #include <vector>
-#include <cstring>
 
 Helpers::SessionCrypto::SessionCrypto(const std::string& aesKey, const std::string& hmacKey)
     : aesKey_(aesKey), hmacKey_(hmacKey) {
@@ -33,13 +35,10 @@ std::string Helpers::SessionCrypto::encryptAndSign(const std::string& sessionId)
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, IV_LENGTH, nullptr);
-    EVP_EncryptInit_ex(ctx, nullptr, nullptr,
-                       reinterpret_cast<const unsigned char*>(aesKey_.data()),
-                       iv.data());
+    EVP_EncryptInit_ex(ctx, nullptr, nullptr, reinterpret_cast<const unsigned char*>(aesKey_.data()), iv.data());
 
     int len;
-    EVP_EncryptUpdate(ctx, ciphertext.data(), &len,
-                      reinterpret_cast<const unsigned char*>(sessionId.data()),
+    EVP_EncryptUpdate(ctx, ciphertext.data(), &len, reinterpret_cast<const unsigned char*>(sessionId.data()),
                       sessionId.size());
     int ciphertext_len = len;
 
@@ -57,9 +56,8 @@ std::string Helpers::SessionCrypto::encryptAndSign(const std::string& sessionId)
     // HMAC-SHA256 Signing
     unsigned char hmac[EVP_MAX_MD_SIZE];
     unsigned int hmacLen;
-    HMAC(EVP_sha256(), hmacKey_.data(), hmacKey_.size(),
-         reinterpret_cast<const unsigned char*>(payload.data()), payload.size(),
-         hmac, &hmacLen);
+    HMAC(EVP_sha256(), hmacKey_.data(), hmacKey_.size(), reinterpret_cast<const unsigned char*>(payload.data()),
+         payload.size(), hmac, &hmacLen);
 
     payload.append(reinterpret_cast<char*>(hmac), HMAC_LENGTH);
 
@@ -81,9 +79,8 @@ std::string Helpers::SessionCrypto::decryptAndVerify(const std::string& tokenBas
     std::string payload(raw.data(), raw.size() - HMAC_LENGTH);
     unsigned char expectedHmac[EVP_MAX_MD_SIZE];
     unsigned int hmacLen;
-    HMAC(EVP_sha256(), hmacKey_.data(), hmacKey_.size(),
-         reinterpret_cast<const unsigned char*>(payload.data()), payload.size(),
-         expectedHmac, &hmacLen);
+    HMAC(EVP_sha256(), hmacKey_.data(), hmacKey_.size(), reinterpret_cast<const unsigned char*>(payload.data()),
+         payload.size(), expectedHmac, &hmacLen);
 
     if (CRYPTO_memcmp(hmac, expectedHmac, HMAC_LENGTH) != 0)
         throw std::runtime_error("Invalid token: HMAC verification failed");
@@ -92,9 +89,7 @@ std::string Helpers::SessionCrypto::decryptAndVerify(const std::string& tokenBas
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), nullptr, nullptr, nullptr);
     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, IV_LENGTH, nullptr);
-    EVP_DecryptInit_ex(ctx, nullptr, nullptr,
-                       reinterpret_cast<const unsigned char*>(aesKey_.data()),
-                       iv);
+    EVP_DecryptInit_ex(ctx, nullptr, nullptr, reinterpret_cast<const unsigned char*>(aesKey_.data()), iv);
 
     int len;
     EVP_DecryptUpdate(ctx, decrypted.data(), &len, ciphertext, cipherLen);

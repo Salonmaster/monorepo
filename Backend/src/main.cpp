@@ -1,5 +1,6 @@
-#include <iostream>
 #include <drogon/drogon.h>
+
+#include <iostream>
 
 #include "Application/Bootstrapper.h"
 

@@ -10,17 +10,14 @@ bool Application::Bootstrapper::processCommandLineArguments(int argc, char** arg
         ->description("Path to the configuration file");
 
     CLI11_PARSE(app, argc, argv);
-    return true; // Placeholder for actual implementation
+    return true;  // Placeholder for actual implementation
 }
 
 bool Application::Bootstrapper::loadConfiguration() {
     spdlog::info("Loading configuration from: {}", Globals::instance().configFilePath);
-    try
-    {
+    try {
         drogon::app().loadConfigFile(Globals::instance().configFilePath);
-    }
-    catch(const std::exception& e)
-    {
+    } catch (const std::exception& e) {
         spdlog::warn(e.what());
     }
     // Load configuration logic here
@@ -40,10 +37,10 @@ bool Application::Bootstrapper::loadConfiguration() {
     // Parse "keycloak" and "app" sections efficiently
     auto& globals = Application::Globals::instance();
     if (const auto& keycloak = root["keycloak"]; !keycloak.isNull()) {
-        globals.keycloakClientId     = keycloak.get("client_id",     globals.keycloakClientId).asString();
+        globals.keycloakClientId = keycloak.get("client_id", globals.keycloakClientId).asString();
         globals.keycloakClientSecret = keycloak.get("client_secret", globals.keycloakClientSecret).asString();
-        globals.keycloakRealm        = keycloak.get("realm",         globals.keycloakRealm).asString();
-        globals.keycloakServerUrl    = keycloak.get("server_url",    globals.keycloakServerUrl).asString();
+        globals.keycloakRealm = keycloak.get("realm", globals.keycloakRealm).asString();
+        globals.keycloakServerUrl = keycloak.get("server_url", globals.keycloakServerUrl).asString();
     } else {
         spdlog::warn("No 'keycloak' section found in config.");
     }
@@ -53,18 +50,18 @@ bool Application::Bootstrapper::loadConfiguration() {
         spdlog::warn("No 'app' section found in config.");
     }
 
-    return true; // Placeholder for actual implementation
+    return true;  // Placeholder for actual implementation
 }
 
 bool Application::Bootstrapper::configureLogging() {
     spdlog::info("Configuring logging...");
-    return true; // Placeholder for actual implementation
+    return true;  // Placeholder for actual implementation
 }
 
 bool Application::Bootstrapper::printBanner() {
     spdlog::info("Welcome to {} version {}", Globals::instance().appName, Globals::instance().appVersion);
-    return true; // Placeholder for actual implementation
-}   
+    return true;  // Placeholder for actual implementation
+}
 
 bool Application::Bootstrapper::startServer() {
     spdlog::info("Starting server...");
@@ -74,17 +71,13 @@ bool Application::Bootstrapper::startServer() {
     drogon::app().run();
     // Server startup logic here
     // Return true if successful, false otherwise
-    return true; // Placeholder for actual implementation
+    return true;  // Placeholder for actual implementation
 }
 
 bool Application::Bootstrapper::run(int argc, char** argv) {
     std::vector<std::function<bool()>> initializers = {
-        [argc, argv]() { return processCommandLineArguments(argc, argv); },
-        []() { return configureLogging(); },
-        []() { return loadConfiguration(); },
-        []() { return printBanner(); },
-        []() { return startServer(); }
-    };
+        [argc, argv]() { return processCommandLineArguments(argc, argv); }, []() { return configureLogging(); },
+        []() { return loadConfiguration(); }, []() { return printBanner(); }, []() { return startServer(); }};
     for (const auto& init : initializers) {
         if (!init()) {
             return false;

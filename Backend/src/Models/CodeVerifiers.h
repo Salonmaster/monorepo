@@ -6,44 +6,39 @@
  */
 
 #pragma once
+#include <drogon/orm/BaseBuilder.h>
+#include <drogon/orm/Field.h>
+#include <drogon/orm/Mapper.h>
 #include <drogon/orm/Result.h>
 #include <drogon/orm/Row.h>
-#include <drogon/orm/Field.h>
 #include <drogon/orm/SqlBinder.h>
-#include <drogon/orm/Mapper.h>
-#include <drogon/orm/BaseBuilder.h>
 #ifdef __cpp_impl_coroutine
 #include <drogon/orm/CoroMapper.h>
 #endif
+#include <json/json.h>
+#include <stdint.h>
 #include <trantor/utils/Date.h>
 #include <trantor/utils/Logger.h>
-#include <json/json.h>
+
+#include <iostream>
+#include <memory>
 #include <string>
 #include <string_view>
-#include <memory>
-#include <vector>
 #include <tuple>
-#include <stdint.h>
-#include <iostream>
+#include <vector>
 
-namespace drogon
-{
-namespace orm
-{
+namespace drogon {
+namespace orm {
 class DbClient;
 using DbClientPtr = std::shared_ptr<DbClient>;
-}
-}
-namespace drogon_model
-{
-namespace backend
-{
+}  // namespace orm
+}  // namespace drogon
+namespace drogon_model {
+namespace backend {
 
-class CodeVerifiers
-{
-  public:
-    struct Cols
-    {
+class CodeVerifiers {
+public:
+    struct Cols {
         static const std::string _id;
         static const std::string _verifier;
         static const std::string _code_challenge;
@@ -56,7 +51,7 @@ class CodeVerifiers
     static const bool hasPrimaryKey;
     static const std::string primaryKeyName;
     using PrimaryKeyType = std::string;
-    const PrimaryKeyType &getPrimaryKey() const;
+    const PrimaryKeyType& getPrimaryKey() const;
 
     /**
      * @brief constructor
@@ -66,92 +61,94 @@ class CodeVerifiers
      * @note If the SQL is not a style of 'select * from table_name ...' (select all
      * columns by an asterisk), please set the offset to -1.
      */
-    explicit CodeVerifiers(const drogon::orm::Row &r, const ssize_t indexOffset = 0) noexcept;
+    explicit CodeVerifiers(const drogon::orm::Row& r, const ssize_t indexOffset = 0) noexcept;
 
     /**
      * @brief constructor
      * @param pJson The json object to construct a new instance.
      */
-    explicit CodeVerifiers(const Json::Value &pJson) noexcept(false);
+    explicit CodeVerifiers(const Json::Value& pJson) noexcept(false);
 
     /**
      * @brief constructor
      * @param pJson The json object to construct a new instance.
      * @param pMasqueradingVector The aliases of table columns.
      */
-    CodeVerifiers(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false);
+    CodeVerifiers(const Json::Value& pJson, const std::vector<std::string>& pMasqueradingVector) noexcept(false);
 
     CodeVerifiers() = default;
 
-    void updateByJson(const Json::Value &pJson) noexcept(false);
-    void updateByMasqueradedJson(const Json::Value &pJson,
-                                 const std::vector<std::string> &pMasqueradingVector) noexcept(false);
-    static bool validateJsonForCreation(const Json::Value &pJson, std::string &err);
-    static bool validateMasqueradedJsonForCreation(const Json::Value &,
-                                                const std::vector<std::string> &pMasqueradingVector,
-                                                    std::string &err);
-    static bool validateJsonForUpdate(const Json::Value &pJson, std::string &err);
-    static bool validateMasqueradedJsonForUpdate(const Json::Value &,
-                                          const std::vector<std::string> &pMasqueradingVector,
-                                          std::string &err);
-    static bool validJsonOfField(size_t index,
-                          const std::string &fieldName,
-                          const Json::Value &pJson,
-                          std::string &err,
-                          bool isForCreation);
+    void updateByJson(const Json::Value& pJson) noexcept(false);
+    void updateByMasqueradedJson(const Json::Value& pJson,
+                                 const std::vector<std::string>& pMasqueradingVector) noexcept(false);
+    static bool validateJsonForCreation(const Json::Value& pJson, std::string& err);
+    static bool validateMasqueradedJsonForCreation(const Json::Value&,
+                                                   const std::vector<std::string>& pMasqueradingVector,
+                                                   std::string& err);
+    static bool validateJsonForUpdate(const Json::Value& pJson, std::string& err);
+    static bool validateMasqueradedJsonForUpdate(const Json::Value&,
+                                                 const std::vector<std::string>& pMasqueradingVector, std::string& err);
+    static bool validJsonOfField(size_t index, const std::string& fieldName, const Json::Value& pJson, std::string& err,
+                                 bool isForCreation);
 
     /**  For column id  */
-    ///Get the value of the column id, returns the default value if the column is null
-    const std::string &getValueOfId() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getId() const noexcept;
-    ///Set the value of the column id
-    void setId(const std::string &pId) noexcept;
-    void setId(std::string &&pId) noexcept;
+    /// Get the value of the column id, returns the default value if the column is null
+    const std::string& getValueOfId() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getId() const noexcept;
+    /// Set the value of the column id
+    void setId(const std::string& pId) noexcept;
+    void setId(std::string&& pId) noexcept;
 
     /**  For column verifier  */
-    ///Get the value of the column verifier, returns the default value if the column is null
-    const std::string &getValueOfVerifier() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getVerifier() const noexcept;
-    ///Set the value of the column verifier
-    void setVerifier(const std::string &pVerifier) noexcept;
-    void setVerifier(std::string &&pVerifier) noexcept;
+    /// Get the value of the column verifier, returns the default value if the column is null
+    const std::string& getValueOfVerifier() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getVerifier() const noexcept;
+    /// Set the value of the column verifier
+    void setVerifier(const std::string& pVerifier) noexcept;
+    void setVerifier(std::string&& pVerifier) noexcept;
 
     /**  For column code_challenge  */
-    ///Get the value of the column code_challenge, returns the default value if the column is null
-    const std::string &getValueOfCodeChallenge() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getCodeChallenge() const noexcept;
-    ///Set the value of the column code_challenge
-    void setCodeChallenge(const std::string &pCodeChallenge) noexcept;
-    void setCodeChallenge(std::string &&pCodeChallenge) noexcept;
+    /// Get the value of the column code_challenge, returns the default value if the column is null
+    const std::string& getValueOfCodeChallenge() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getCodeChallenge() const noexcept;
+    /// Set the value of the column code_challenge
+    void setCodeChallenge(const std::string& pCodeChallenge) noexcept;
+    void setCodeChallenge(std::string&& pCodeChallenge) noexcept;
 
     /**  For column code_challenge_method  */
-    ///Get the value of the column code_challenge_method, returns the default value if the column is null
-    const std::string &getValueOfCodeChallengeMethod() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getCodeChallengeMethod() const noexcept;
-    ///Set the value of the column code_challenge_method
-    void setCodeChallengeMethod(const std::string &pCodeChallengeMethod) noexcept;
-    void setCodeChallengeMethod(std::string &&pCodeChallengeMethod) noexcept;
+    /// Get the value of the column code_challenge_method, returns the default value if the column is null
+    const std::string& getValueOfCodeChallengeMethod() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<std::string>& getCodeChallengeMethod() const noexcept;
+    /// Set the value of the column code_challenge_method
+    void setCodeChallengeMethod(const std::string& pCodeChallengeMethod) noexcept;
+    void setCodeChallengeMethod(std::string&& pCodeChallengeMethod) noexcept;
 
     /**  For column created_at  */
-    ///Get the value of the column created_at, returns the default value if the column is null
-    const ::trantor::Date &getValueOfCreatedAt() const noexcept;
-    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<::trantor::Date> &getCreatedAt() const noexcept;
-    ///Set the value of the column created_at
-    void setCreatedAt(const ::trantor::Date &pCreatedAt) noexcept;
+    /// Get the value of the column created_at, returns the default value if the column is null
+    const ::trantor::Date& getValueOfCreatedAt() const noexcept;
+    /// Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is
+    /// null
+    const std::shared_ptr<::trantor::Date>& getCreatedAt() const noexcept;
+    /// Set the value of the column created_at
+    void setCreatedAt(const ::trantor::Date& pCreatedAt) noexcept;
 
-
-    static size_t getColumnNumber() noexcept {  return 5;  }
-    static const std::string &getColumnName(size_t index) noexcept(false);
+    static size_t getColumnNumber() noexcept {
+        return 5;
+    }
+    static const std::string& getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
-    Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
+    Json::Value toMasqueradedJson(const std::vector<std::string>& pMasqueradingVector) const;
     /// Relationship interfaces
-  private:
+private:
     friend drogon::orm::Mapper<CodeVerifiers>;
     friend drogon::orm::BaseBuilder<CodeVerifiers, true, true>;
     friend drogon::orm::BaseBuilder<CodeVerifiers, true, false>;
@@ -160,19 +157,18 @@ class CodeVerifiers
 #ifdef __cpp_impl_coroutine
     friend drogon::orm::CoroMapper<CodeVerifiers>;
 #endif
-    static const std::vector<std::string> &insertColumns() noexcept;
-    void outputArgs(drogon::orm::internal::SqlBinder &binder) const;
+    static const std::vector<std::string>& insertColumns() noexcept;
+    void outputArgs(drogon::orm::internal::SqlBinder& binder) const;
     const std::vector<std::string> updateColumns() const;
-    void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
-    ///For mysql or sqlite3
+    void updateArgs(drogon::orm::internal::SqlBinder& binder) const;
+    /// For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<std::string> id_;
     std::shared_ptr<std::string> verifier_;
     std::shared_ptr<std::string> codeChallenge_;
     std::shared_ptr<std::string> codeChallengeMethod_;
     std::shared_ptr<::trantor::Date> createdAt_;
-    struct MetaData
-    {
+    struct MetaData {
         const std::string colName_;
         const std::string colType_;
         const std::string colDatabaseType_;
@@ -182,110 +178,88 @@ class CodeVerifiers
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[5]={ false };
-  public:
-    static const std::string &sqlForFindingByPrimaryKey()
-    {
-        static const std::string sql="select * from " + tableName + " where id = $1";
+    bool dirtyFlag_[5] = {false};
+
+public:
+    static const std::string& sqlForFindingByPrimaryKey() {
+        static const std::string sql = "select * from " + tableName + " where id = $1";
         return sql;
     }
 
-    static const std::string &sqlForDeletingByPrimaryKey()
-    {
-        static const std::string sql="delete from " + tableName + " where id = $1";
+    static const std::string& sqlForDeletingByPrimaryKey() {
+        static const std::string sql = "delete from " + tableName + " where id = $1";
         return sql;
     }
-    std::string sqlForInserting(bool &needSelection) const
-    {
-        std::string sql="insert into " + tableName + " (";
+    std::string sqlForInserting(bool& needSelection) const {
+        std::string sql = "insert into " + tableName + " (";
         size_t parametersCount = 0;
         needSelection = false;
         sql += "id,";
         ++parametersCount;
-        if(!dirtyFlag_[0])
-        {
-            needSelection=true;
+        if (!dirtyFlag_[0]) {
+            needSelection = true;
         }
-        if(dirtyFlag_[1])
-        {
+        if (dirtyFlag_[1]) {
             sql += "verifier,";
             ++parametersCount;
         }
-        if(dirtyFlag_[2])
-        {
+        if (dirtyFlag_[2]) {
             sql += "code_challenge,";
             ++parametersCount;
         }
-        if(dirtyFlag_[3])
-        {
+        if (dirtyFlag_[3]) {
             sql += "code_challenge_method,";
             ++parametersCount;
         }
         sql += "created_at,";
         ++parametersCount;
-        if(!dirtyFlag_[4])
-        {
-            needSelection=true;
+        if (!dirtyFlag_[4]) {
+            needSelection = true;
         }
-        if(parametersCount > 0)
-        {
-            sql[sql.length()-1]=')';
+        if (parametersCount > 0) {
+            sql[sql.length() - 1] = ')';
             sql += " values (";
-        }
-        else
+        } else
             sql += ") values (";
 
-        int placeholder=1;
+        int placeholder = 1;
         char placeholderStr[64];
-        size_t n=0;
-        if(dirtyFlag_[0])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        size_t n = 0;
+        if (dirtyFlag_[0]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
+            sql.append(placeholderStr, n);
+        } else {
+            sql += "default,";
+        }
+        if (dirtyFlag_[1]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        else
-        {
-            sql +="default,";
-        }
-        if(dirtyFlag_[1])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[2]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[2])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[3]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
         }
-        if(dirtyFlag_[3])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
+        if (dirtyFlag_[4]) {
+            n = snprintf(placeholderStr, sizeof(placeholderStr), "$%d,", placeholder++);
             sql.append(placeholderStr, n);
+        } else {
+            sql += "default,";
         }
-        if(dirtyFlag_[4])
-        {
-            n = snprintf(placeholderStr,sizeof(placeholderStr),"$%d,",placeholder++);
-            sql.append(placeholderStr, n);
-        }
-        else
-        {
-            sql +="default,";
-        }
-        if(parametersCount > 0)
-        {
+        if (parametersCount > 0) {
             sql.resize(sql.length() - 1);
         }
-        if(needSelection)
-        {
+        if (needSelection) {
             sql.append(") returning *");
-        }
-        else
-        {
+        } else {
             sql.append(1, ')');
         }
         LOG_TRACE << sql;
         return sql;
     }
 };
-} // namespace backend
-} // namespace drogon_model
+}  // namespace backend
+}  // namespace drogon_model
