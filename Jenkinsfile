@@ -65,7 +65,7 @@ for chart in apps/*/; do
     fi
 done
 
-pip install poetry pip-audit
+pip install --upgrade pip poetry pip-audit
 poetry install --no-root --with dev
 poetry run ruff check stylist/
 poetry run pytest
