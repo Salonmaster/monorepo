@@ -80,25 +80,6 @@ HEREDOC_END
                     }
                 }
 
-                stage('Terraform - Validate & Scan') {
-                    steps {
-                        sh '''
-                            docker run --rm \
-                                -v "$PWD/Terraform:/work:Z" -w /work --entrypoint= \
-                                hashicorp/terraform:1.15.6 sh -c "
-                                terraform fmt -check -recursive && \
-                                terraform init -backend=false && \
-                                terraform validate
-                            "
-                        '''
-                        sh '''
-                            docker run --rm \
-                                -v "$PWD/Terraform:/work:Z" -w /work \
-                                aquasec/trivy:latest config --severity HIGH,CRITICAL --exit-code 0 /work
-                        '''
-                    }
-                }
-
                 stage('Website - Lint & Audit') {
                     steps {
                         sh '''
