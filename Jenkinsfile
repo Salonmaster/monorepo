@@ -50,23 +50,25 @@ pipeline {
                 stage('Kubernetes - Lint') {
                     steps {
                         sh '''
-                            docker run --rm \
-                                -v "$PWD/Kubernetes:/work:Z" -w /work python:3.12-alpine sh -c "
-                                wget -qO- https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz | tar xz && \
-                                mv linux-amd64/helm /usr/local/bin/helm && \
-                                for chart in apps/*/; do
-                                    chart=\${chart%/}
-                                    if [ -f \"\$chart/values-tst.yaml\" ]; then
-                                        helm lint \"\$chart\" --values \"\$chart/values-tst.yaml\"
-                                    else
-                                        helm lint \"\$chart\"
-                                    fi
-                                done && \
-                                pip install poetry && \
-                                poetry install --no-root --with dev && \
-                                poetry run ruff check stylist/ && \
-                                poetry run pytest
-                            "
+                            docker run -i --rm \
+                                -v "$PWD/Kubernetes:/work:Z" -w /work python:3.12-alpine sh -s <<'HEREDOC_END'
+wget -qO- https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz | tar xz
+mv linux-amd64/helm /usr/local/bin/helm
+
+for chart in apps/*/; do
+    chart=${chart%/}
+    if [ -f "$chart/values-tst.yaml" ]; then
+        helm lint "$chart" --values "$chart/values-tst.yaml"
+    else
+        helm lint "$chart"
+    fi
+done
+
+pip install poetry
+poetry install --no-root --with dev
+poetry run ruff check stylist/
+poetry run pytest
+HEREDOC_END
                         '''
                     }
                 }
