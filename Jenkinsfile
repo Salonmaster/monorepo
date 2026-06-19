@@ -203,9 +203,6 @@ HEREDOC_END
         }
 
         stage('Publish') {
-            when {
-                branch 'main'
-            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'harbor-registry',
