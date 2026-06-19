@@ -14,7 +14,9 @@ RUN apk add --no-cache \
     zlib-dev \
     linux-headers \
     perl-utils \
+    m4 \
     boost-dev \
+    pkgconf \
     lz4-dev \
     upx
 
@@ -46,7 +48,11 @@ compiler.libcxx=libstdc++11\n\
 compiler.cppstd=23\n\
 build_type=Release\n\
 [options]\n\
-*:shared=False\n" "$CONAN_ARCH" "$GCC_VER" > ~/.conan2/profiles/default
+*:shared=False\n\
+[conf]\n\
+tools.gnu:pkg_config=/usr/bin/pkg-config\n\
+[buildenv]\n\
+M4=/usr/bin/m4\n" "$CONAN_ARCH" "$GCC_VER" > ~/.conan2/profiles/default
 
 RUN /venv/bin/conan install . --build=missing -s build_type=Release -v status
 
