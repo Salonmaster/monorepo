@@ -41,13 +41,13 @@ def list_secrets(
 ):
     """List secrets stored in Vault."""
     typer.secho("📋 Listing secrets from Vault...", fg=typer.colors.BRIGHT_BLUE)
-    
+
     # Get root token
     token = root_token
     if not token and secrets_db:
         from stylist.helpers import database
         from stylist.helpers import remote_db
-        
+
         local_db, _ = remote_db.prepare_secrets_db(
             secrets_db,
             auto_cleanup=True,
@@ -60,12 +60,12 @@ def list_secrets(
             typer.secho("❌ Could not find Vault root token in secrets database", fg=typer.colors.RED)
             typer.secho("   Please provide --root-token or ensure vault root token is in secrets database", fg=typer.colors.YELLOW)
             raise typer.Exit(1)
-    
+
     if not token:
         token = typer.prompt("Vault root token", hide_input=True)
-    
+
     namespace_filter = namespace or core.Backbone().context.vault_namespace if namespace else None
-    
+
     try:
         with vault_helper.port_forward_vault(
             namespace=core.Backbone().context.vault_namespace,
@@ -77,7 +77,7 @@ def list_secrets(
                 namespace=namespace_filter,
                 name=name,
             )
-            
+
             if not secrets:
                 typer.secho("📭 No secrets found", fg=typer.colors.YELLOW)
                 if namespace_filter:
@@ -85,7 +85,7 @@ def list_secrets(
                 if name:
                     typer.secho(f"   (filtered by name: {name})", fg=typer.colors.BRIGHT_BLACK)
                 return
-            
+
             # Group secrets by path
             grouped: dict[str, list[str]] = {}
             for secret in secrets:
@@ -93,23 +93,23 @@ def list_secrets(
                 if path not in grouped:
                     grouped[path] = []
                 grouped[path].append(secret.key)
-            
+
             if RICH_AVAILABLE:
                 console = Console()
                 table = Table(title="Vault Secrets")
                 table.add_column("Path", style="cyan")
                 table.add_column("Keys", style="green")
-                
+
                 for path, keys in sorted(grouped.items()):
                     table.add_row(path, ", ".join(sorted(keys)))
-                
+
                 console.print(table)
             else:
                 typer.secho("\nVault Secrets:", fg=typer.colors.BRIGHT_BLUE, bold=True)
                 for path, keys in sorted(grouped.items()):
                     typer.secho(f"  {path}: {', '.join(sorted(keys))}", fg=typer.colors.CYAN)
             typer.secho(f"\n✅ Found {len(secrets)} secret(s) across {len(grouped)} path(s)", fg=typer.colors.GREEN)
-            
+
     except Exception as e:
         typer.secho(f"❌ Error listing secrets: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

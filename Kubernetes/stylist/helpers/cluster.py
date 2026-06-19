@@ -382,7 +382,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
             # If it's not 404, log but continue with deletion attempt
             if logger:
                 logger.debug(f"Could not read/patch CRD '{crd_name}': {exc}")
-    
+
     # Now try using kubectl for more aggressive deletion
     try:
         # Use kubectl delete with --force and --grace-period=0
@@ -399,7 +399,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
         )
         stdout, stderr = await process.communicate()
         stderr_text = stderr.decode() if stderr else ""
-        
+
         # Also try API-based deletion as a backup
         async with kubernetes_asyncio.client.ApiClient() as api_client:
             api = kubernetes_asyncio.client.ApiextensionsV1Api(api_client)
@@ -416,7 +416,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
                 if exc.status != 404:
                     if logger:
                         logger.debug(f"API delete also failed for CRD '{crd_name}': {exc}")
-            
+
             # Wait and verify deletion with multiple checks
             max_checks = 15
             for check_num in range(max_checks):
@@ -436,7 +436,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
                             )
                         return True
                     raise
-            
+
             # If we get here, CRD still exists after deletion attempt
             if logger:
                 logger.warning(f"CRD '{crd_name}' deletion initiated but may still be terminating")
@@ -450,7 +450,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
         # Fallback to API-based deletion if kubectl fails
         if logger:
             logger.debug(f"kubectl force delete failed for '{crd_name}', trying API method: {kubectl_exc}")
-        
+
         async with kubernetes_asyncio.client.ApiClient() as api_client:
             api = kubernetes_asyncio.client.ApiextensionsV1Api(api_client)
             try:
@@ -464,7 +464,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
                             logger.info(f"CRD '{crd_name}' does not exist, already deleted")
                         return True
                     raise
-                
+
                 # Remove finalizers if they exist
                 if crd.metadata.finalizers:
                     patch_body = {"metadata": {"finalizers": []}}
@@ -474,7 +474,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
                     )
                     # Wait a moment for Kubernetes to process the finalizer removal
                     await asyncio.sleep(1)
-                
+
                 # Force delete the CRD with grace period 0 and background propagation
                 delete_opts = kubernetes_asyncio.client.V1DeleteOptions(
                     grace_period_seconds=0,
@@ -489,7 +489,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
                     # If it's already gone (404), that's fine
                     if exc.status != 404:
                         raise
-                
+
                 # Verify deletion by checking if CRD still exists
                 max_checks = 10
                 for _ in range(max_checks):
@@ -507,7 +507,7 @@ async def force_delete_crd(crd_name: str, logger: logging.Logger | None = None) 
                                     fg=typer.colors.YELLOW,
                                 )
                             return True
-                
+
                 # If we get here, CRD still exists after deletion attempt
                 if logger:
                     logger.warning(f"CRD '{crd_name}' deletion initiated but may still be terminating")

@@ -47,11 +47,11 @@ class MockExit(SystemExit):
 def create_port_forward_mock():
     """Create a mock port_forward_vault context manager."""
     from contextlib import contextmanager
-    
+
     @contextmanager
     def mock_port_forward(namespace=None, pod_name=None):
         yield "http://localhost:8200"
-    
+
     return mock_port_forward
 
 
@@ -60,16 +60,16 @@ def mock_context(monkeypatch):
     """Mock the core.Backbone context."""
     # Get or create the Backbone instance
     backbone = core.Backbone()
-    
+
     # Ensure context exists
     if backbone.context is None:
         from core.context import Context
         backbone.context = Context()
-    
+
     # Set vault-specific context attributes
     backbone.context.vault_namespace = "vault"
     backbone.context.vault_pod_name = "vault-0"
-    
+
     return backbone.context
 
 
@@ -105,14 +105,14 @@ class TestVaultStatus:
     async def test_status_success(self, mock_context, mock_vault_helper):
         """Test successful vault status check."""
         mock_vault_helper.check_vault_connection = AsyncMock(return_value=True)
-        
+
         with patch("stylist.commands.vault.status.asyncio.run") as mock_run:
             mock_run.return_value = True
-            
+
             # Mock typer to capture output
             with patch("stylist.commands.vault.status.typer") as mock_typer:
                 status()
-                
+
                 # Verify vault connection was checked
                 mock_run.assert_called_once()
                 mock_typer.secho.assert_any_call(
@@ -124,19 +124,19 @@ class TestVaultStatus:
     async def test_status_failure(self, mock_context, mock_vault_helper):
         """Test vault status check when vault is not accessible."""
         mock_vault_helper.check_vault_connection = AsyncMock(return_value=False)
-        
+
         with patch("stylist.commands.vault.status.asyncio.run") as mock_run:
             mock_run.return_value = False
-            
+
             with patch("stylist.commands.vault.status.typer") as mock_typer:
                 mock_typer.Exit = SystemExit
-                
+
                 try:
                     status()
                     assert False, "Should have raised SystemExit"
                 except SystemExit:
                     pass
-                
+
                 mock_typer.secho.assert_any_call(
                     "❌ Vault is not accessible",
                     fg=mock_typer.colors.RED
@@ -163,17 +163,17 @@ class TestVaultListSecrets:
                 value="admin"
             ),
         ]
-        
+
         mock_vault_helper.read_secrets = MagicMock(return_value=mock_secrets)
         # Create a proper context manager mock using contextlib
         from contextlib import contextmanager
-        
+
         @contextmanager
         def mock_port_forward(namespace=None, pod_name=None):
             yield "http://localhost:8200"
-        
+
         mock_vault_helper.port_forward_vault = mock_port_forward
-        
+
         # Mock database helper
         with patch("stylist.helpers.database") as mock_db:
             with patch("stylist.helpers.remote_db") as mock_remote_db:
@@ -181,7 +181,7 @@ class TestVaultListSecrets:
                 mock_db.get_credentials.return_value = [
                     MagicMock(name="Vault Root Token", password="test-token")
                 ]
-                
+
                 with patch("stylist.commands.vault.list_secrets.typer") as mock_typer:
                     # Create a proper Exit exception that accepts code parameter
                     class MockExit(SystemExit):
@@ -194,7 +194,7 @@ class TestVaultListSecrets:
                             secrets_db=str(tmp_path / "test.db"),
                             root_token="test-token"
                         )
-                        
+
                         mock_vault_helper.read_secrets.assert_called_once()
                         mock_typer.secho.assert_any_call(
                             "📋 Listing secrets from Vault...",
@@ -207,10 +207,10 @@ class TestVaultListSecrets:
         mock_vault_helper.port_forward_vault = MagicMock()
         mock_vault_helper.port_forward_vault.return_value.__enter__ = MagicMock(return_value="http://localhost:8200")
         mock_vault_helper.port_forward_vault.return_value.__exit__ = MagicMock(return_value=None)
-        
+
         with patch("stylist.commands.vault.list_secrets.typer") as mock_typer:
             list_secrets(root_token="test-token")
-            
+
             mock_typer.secho.assert_any_call(
                 "📭 No secrets found",
                 fg=mock_typer.colors.YELLOW
@@ -230,18 +230,18 @@ class TestVaultReadSecret:
                 value="secret123"
             ),
         ]
-        
+
         # Configure the mock to return our test secrets
         mock_vault_helper.read_secrets.return_value = mock_secrets
         # Create a proper context manager mock using contextlib
         from contextlib import contextmanager
-        
+
         @contextmanager
         def mock_port_forward(namespace=None, pod_name=None):
             yield "http://localhost:8200"
-        
+
         mock_vault_helper.port_forward_vault = mock_port_forward
-        
+
         with patch("stylist.commands.vault.read_secret.typer") as mock_typer:
             mock_typer.Exit = SystemExit
             read_secret(
@@ -250,7 +250,7 @@ class TestVaultReadSecret:
                 root_token="test-token",
                 key=None  # Explicitly set to None to avoid any typer.Option issues
             )
-            
+
             mock_vault_helper.read_secrets.assert_called_once()
             mock_typer.secho.assert_any_call(
                 "📖 Reading secret: database-system/cluster-credentials",
@@ -263,10 +263,10 @@ class TestVaultReadSecret:
         mock_vault_helper.port_forward_vault = MagicMock()
         mock_vault_helper.port_forward_vault.return_value.__enter__ = MagicMock(return_value="http://localhost:8200")
         mock_vault_helper.port_forward_vault.return_value.__exit__ = MagicMock(return_value=None)
-        
+
         with patch("stylist.commands.vault.read_secret.typer") as mock_typer:
             mock_typer.Exit = SystemExit
-            
+
             try:
                 read_secret(
                     namespace="database-system",
@@ -276,7 +276,7 @@ class TestVaultReadSecret:
                 assert False, "Should have raised SystemExit"
             except SystemExit:
                 pass
-            
+
             mock_typer.secho.assert_any_call(
                 "❌ Secret not found: database-system/nonexistent",
                 fg=mock_typer.colors.RED
@@ -298,18 +298,18 @@ class TestVaultReadSecret:
                 value="admin"
             ),
         ]
-        
+
         # Configure the mock to return our test secrets
         mock_vault_helper.read_secrets.return_value = mock_secrets
         # Create a proper context manager mock using contextlib
         from contextlib import contextmanager
-        
+
         @contextmanager
         def mock_port_forward(namespace=None, pod_name=None):
             yield "http://localhost:8200"
-        
+
         mock_vault_helper.port_forward_vault = mock_port_forward
-        
+
         with patch("stylist.commands.vault.read_secret.typer") as mock_typer:
             mock_typer.Exit = SystemExit
             read_secret(
@@ -318,7 +318,7 @@ class TestVaultReadSecret:
                 key="password",
                 root_token="test-token"
             )
-            
+
             # Should filter to only password key
             assert len([s for s in mock_secrets if s.key == "password"]) == 1
 
@@ -331,13 +331,13 @@ class TestVaultWriteSecret:
         # Configure the mock
         mock_vault_helper.store_secrets.return_value = True
         from contextlib import contextmanager
-        
+
         @contextmanager
         def mock_port_forward(namespace=None, pod_name=None):
             yield "http://localhost:8200"
-        
+
         mock_vault_helper.port_forward_vault = mock_port_forward
-        
+
         with patch("stylist.commands.vault.write_secret.typer") as mock_typer:
             mock_typer.Exit = SystemExit
             write_secret(
@@ -347,7 +347,7 @@ class TestVaultWriteSecret:
                 value="secret123",
                 root_token="test-token"
             )
-            
+
             mock_vault_helper.store_secrets.assert_called_once()
             call_args = mock_vault_helper.store_secrets.call_args
             # call_args can be (args, kwargs) or just args
@@ -374,7 +374,7 @@ class TestVaultWriteSecret:
                     assert secrets_list[0].value == "secret123"
                 else:
                     raise AssertionError(f"Could not find secrets in call_args: {call_args}")
-            
+
             mock_typer.secho.assert_any_call(
                 "✅ Successfully wrote secret: database-system/test-secret/password",
                 fg=mock_typer.colors.GREEN
@@ -386,10 +386,10 @@ class TestVaultWriteSecret:
         mock_vault_helper.port_forward_vault = MagicMock()
         mock_vault_helper.port_forward_vault.return_value.__enter__ = MagicMock(return_value="http://localhost:8200")
         mock_vault_helper.port_forward_vault.return_value.__exit__ = MagicMock(return_value=None)
-        
+
         with patch("stylist.commands.vault.write_secret.typer") as mock_typer:
             mock_typer.Exit = SystemExit
-            
+
             try:
                 write_secret(
                     namespace="database-system",
@@ -401,7 +401,7 @@ class TestVaultWriteSecret:
                 assert False, "Should have raised SystemExit"
             except SystemExit:
                 pass
-            
+
             mock_typer.secho.assert_any_call(
                 "❌ Failed to write secret: database-system/test-secret/password",
                 fg=mock_typer.colors.RED
@@ -415,7 +415,7 @@ class TestVaultUnseal:
     async def test_unseal_success(self, mock_context, mock_vault_helper, tmp_path):
         """Test successful unsealing of vault."""
         mock_vault_helper.unseal_vault = AsyncMock(return_value=True)
-        
+
         with patch("stylist.helpers.database") as mock_db:
             with patch("stylist.helpers.remote_db") as mock_remote_db:
                 mock_remote_db.prepare_secrets_db.return_value = (str(tmp_path / "test.db"), None)
@@ -424,17 +424,17 @@ class TestVaultUnseal:
                 mock_cred.name = "Vault Unseal Keys"
                 mock_cred.password = "key1\nkey2\nkey3\nkey4\nkey5"
                 mock_db.get_credentials.return_value = [mock_cred]
-                
+
                 with patch("stylist.commands.vault.unseal.asyncio.run") as mock_run:
                     mock_run.return_value = True
-                    
+
                     with patch("stylist.commands.vault.unseal.typer") as mock_typer:
                         with patch("stylist.commands.vault.unseal.database", mock_db):
                             with patch("stylist.commands.vault.unseal.remote_db", mock_remote_db):
                                 with patch("stylist.commands.vault.unseal.vault_helper", mock_vault_helper):
                                     mock_typer.Exit = SystemExit
                                     unseal(secrets_db=str(tmp_path / "test.db"))
-                                    
+
                                     mock_run.assert_called_once()
                                     mock_typer.secho.assert_any_call(
                                         "🔓 Unsealing Vault...",
@@ -448,18 +448,18 @@ class TestVaultUnseal:
             with patch("stylist.helpers.remote_db") as mock_remote_db:
                 mock_remote_db.prepare_secrets_db.return_value = (str(tmp_path / "test.db"), None)
                 mock_db.get_credentials.return_value = []  # No vault keys
-                
+
                 with patch("stylist.commands.vault.unseal.typer") as mock_typer:
                     with patch("stylist.commands.vault.unseal.database", mock_db):
                         with patch("stylist.commands.vault.unseal.remote_db", mock_remote_db):
                             mock_typer.Exit = SystemExit
-                            
+
                             try:
                                 unseal(secrets_db=str(tmp_path / "test.db"))
                                 assert False, "Should have raised SystemExit"
                             except SystemExit:
                                 pass
-                            
+
                             mock_typer.secho.assert_any_call(
                                 "❌ Could not find Vault keys in secrets database",
                                 fg=mock_typer.colors.RED
@@ -476,22 +476,22 @@ class TestVaultInit:
             unseal_keys=["key1", "key2", "key3", "key4", "key5"],
             root_token="root-token-123"
         )
-        
+
         # Configure the mock - init_vault is async but asyncio.run handles it
         mock_vault_helper.init_vault = AsyncMock(return_value=vault_keys_obj)
         # Mock print_keys to avoid typer calls
         vault_keys_obj.print_keys = MagicMock()
-        
+
         with patch("stylist.commands.vault.init.asyncio.run") as mock_run:
             # asyncio.run will execute the coroutine and return its result
             mock_run.return_value = vault_keys_obj
-            
+
             with patch("stylist.commands.vault.init.typer") as mock_typer:
                 with patch("stylist.commands.vault.init.vault_helper", mock_vault_helper):
                     mock_typer.Exit = SystemExit
                     # Explicitly set save_to_db=False to avoid database operations
                     init(save_to_db=False, secrets_db=None)
-                    
+
                     mock_run.assert_called_once()
                     mock_typer.secho.assert_any_call(
                         "🔧 Initializing Vault...",
@@ -506,19 +506,19 @@ class TestVaultInit:
     async def test_init_failure(self, mock_context, mock_vault_helper):
         """Test vault initialization failure."""
         mock_vault_helper.init_vault = AsyncMock(return_value=None)
-        
+
         with patch("stylist.commands.vault.init.asyncio.run") as mock_run:
             mock_run.return_value = None
-            
+
             with patch("stylist.commands.vault.init.typer") as mock_typer:
                 mock_typer.Exit = SystemExit
-                
+
                 try:
                     init()
                     assert False, "Should have raised SystemExit"
                 except SystemExit:
                     pass
-                
+
                 mock_typer.secho.assert_any_call(
                     "❌ Failed to initialize Vault",
                     fg=mock_typer.colors.RED
@@ -531,22 +531,22 @@ class TestVaultInit:
             unseal_keys=["key1", "key2", "key3", "key4", "key5"],
             root_token="root-token-123"
         )
-        
+
         mock_vault_helper.init_vault = AsyncMock(return_value=vault_keys_obj)
-        
+
         with patch("stylist.commands.vault.init.asyncio.run") as mock_run:
             mock_run.return_value = vault_keys_obj
-            
+
             with patch("stylist.helpers.database") as mock_db:
                 with patch("stylist.helpers.remote_db") as mock_remote_db:
                     mock_remote_db.prepare_secrets_db.return_value = (str(tmp_path / "test.db"), None)
-                    
+
                     with patch("stylist.commands.vault.init.typer") as mock_typer:
                         init(
                             save_to_db=True,
                             secrets_db=str(tmp_path / "test.db")
                         )
-                        
+
                         # Verify database was called to save credentials
                         assert mock_db.add_credential.call_count == 2  # Keys and token
                         mock_typer.secho.assert_any_call(

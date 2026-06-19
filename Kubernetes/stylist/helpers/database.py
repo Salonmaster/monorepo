@@ -136,7 +136,7 @@ def remove_secret(
     silent: bool = False,
 ) -> bool:
     """Remove a secret record from the database.
-    
+
     Returns:
         True if the secret was removed, False if it was not found.
     """
@@ -235,9 +235,9 @@ def add_credential(
     password: str,
 ) -> None:
     """Add or update a credential in the database.
-    
+
     Credentials are stored as secrets with namespace 'stylist-credentials'.
-    
+
     Args:
         db_path: Path to the database file
         db_password: Password for the database encryption
@@ -273,7 +273,7 @@ def get_credentials(
     password: Optional[str] = None,
 ) -> List[Credential]:
     """Retrieve all credentials from the database.
-    
+
     Returns a list of Credential objects with name, password, and username attributes.
     """
     conn = get_db_connection(db_path, password)
@@ -283,19 +283,19 @@ def get_credentials(
     )
     rows = cursor.fetchall()
     conn.close()
-    
+
     # Group by credential name
     credentials_dict: dict[str, dict[str, str]] = {}
     for name, key, value in rows:
         if name not in credentials_dict:
             credentials_dict[name] = {}
         credentials_dict[name][key] = value
-    
+
     # Convert to Credential objects
     credentials = []
     for name, fields in credentials_dict.items():
         cred_password = fields.get("password", "")
         cred_username = fields.get("username", "")
         credentials.append(Credential(name=name, password=cred_password, username=cred_username))
-    
+
     return credentials

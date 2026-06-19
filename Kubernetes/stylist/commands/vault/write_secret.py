@@ -33,18 +33,18 @@ def write_secret(
 ):
     """Write a secret to Vault."""
     typer.secho(f"✍️  Writing secret: {namespace}/{name}/{key}", fg=typer.colors.BRIGHT_BLUE)
-    
+
     # Get value if not provided
     secret_value = value
     if not secret_value:
         secret_value = typer.prompt(f"Value for {key}", hide_input=True)
-    
+
     # Get root token
     token = root_token
     if not token and secrets_db:
         from stylist.helpers import database
         from stylist.helpers import remote_db
-        
+
         local_db, _ = remote_db.prepare_secrets_db(
             secrets_db,
             auto_cleanup=True,
@@ -57,10 +57,10 @@ def write_secret(
             typer.secho("❌ Could not find Vault root token in secrets database", fg=typer.colors.RED)
             typer.secho("   Please provide --root-token or ensure vault root token is in secrets database", fg=typer.colors.YELLOW)
             raise typer.Exit(1)
-    
+
     if not token:
         token = typer.prompt("Vault root token", hide_input=True)
-    
+
     try:
         secret = vault_secret.VaultSecret(
             namespace=namespace,
@@ -68,7 +68,7 @@ def write_secret(
             key=key,
             value=secret_value,
         )
-        
+
         with vault_helper.port_forward_vault(
             namespace=core.Backbone().context.vault_namespace,
             pod_name=core.Backbone().context.vault_pod_name,
@@ -78,13 +78,13 @@ def write_secret(
                 root_token=token,
                 url=vault_url,
             )
-            
+
             if success:
                 typer.secho(f"✅ Successfully wrote secret: {namespace}/{name}/{key}", fg=typer.colors.GREEN)
             else:
                 typer.secho(f"❌ Failed to write secret: {namespace}/{name}/{key}", fg=typer.colors.RED)
                 raise typer.Exit(1)
-            
+
     except Exception as e:
         typer.secho(f"❌ Error writing secret: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

@@ -11,4 +11,4 @@ sys.modules['console'] = mock_console
 sys.modules['console.database_editor'] = mock_database_editor
 
 # Configure pytest-asyncio
-pytest_plugins = ("pytest_asyncio",)
+# pytest_asyncio registered via pyproject.toml [tool.pytest.ini_options]

@@ -63,7 +63,7 @@ def vault(
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())
         raise typer.Exit(code=0)
-    
+
     core.Backbone().context.environment = environment
 
     kubeconfig_input = str(kubeconfig)
@@ -84,7 +84,7 @@ def vault(
         os.environ["KUBECONFIG"] = core.Backbone().context.kubeconfig
     if kubeconfig_handle:
         atexit.register(kubeconfig_handle.close)
-    
+
     secrets_db_value = secrets_db if secrets_db else None
     if secrets_db_value and remote_db.is_s3_path(secrets_db_value):
         core.Backbone().context.secrets_db = remote_db.normalize_s3_path(secrets_db_value)
@@ -92,7 +92,7 @@ def vault(
         core.Backbone().context.secrets_db = os.path.expanduser(secrets_db_value) if secrets_db_value else None
     core.Backbone().context.secrets_db_password = secrets_db_password
     core.Backbone().context.credentials = []
-    
+
     # Store vault-specific context
     core.Backbone().context.vault_namespace = namespace
     core.Backbone().context.vault_pod_name = pod_name

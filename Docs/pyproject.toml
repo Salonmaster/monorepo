@@ -11,6 +11,9 @@ mkdocs = "^1.6.0"
 mkdocs-material = "^9.5.0"
 pymdown-extensions = "^10.8"
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.14.0"
+
 [build-system]
 requires = ["poetry-core>=1.9.0"]
 build-backend = "poetry.core.masonry.api"

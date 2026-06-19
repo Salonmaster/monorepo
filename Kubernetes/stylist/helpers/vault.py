@@ -267,58 +267,58 @@ def read_secrets(
     name: str | None = None,
 ) -> list[models.VaultSecret]:
     """Read secrets from Vault.
-    
+
     Args:
         root_token: Vault root token for authentication
         url: Vault URL (defaults to None, will use port-forward if needed)
         namespace: Optional namespace filter (e.g., "database-system")
         name: Optional secret name filter (e.g., "cluster-credentials")
-    
+
     Returns:
         List of VaultSecret objects read from Vault
     """
     client = hvac.Client(url=url, token=root_token)
     secrets = []
-    
+
     try:
         # List all secrets under system (path without leading slash for listing)
         list_response = client.secrets.kv.v2.list_secrets(
             mount_point="secret",
             path="system",
         )
-        
+
         if not list_response or "data" not in list_response or "keys" not in list_response["data"]:
             return secrets
-        
+
         # Iterate through namespaces
         for ns in list_response["data"]["keys"]:
             if namespace and ns != namespace:
                 continue
-            
+
             try:
                 ns_list = client.secrets.kv.v2.list_secrets(
                     mount_point="secret",
                     path=f"system/{ns}",
                 )
-                
+
                 if not ns_list or "data" not in ns_list or "keys" not in ns_list["data"]:
                     continue
-                
+
                 # Iterate through secret names in namespace
                 for secret_name in ns_list["data"]["keys"]:
                     if name and secret_name != name:
                         continue
-                    
+
                     try:
                         # Read the secret (path without leading slash for read_secret_version)
                         secret_response = client.secrets.kv.v2.read_secret_version(
                             mount_point="secret",
                             path=f"system/{ns}/{secret_name}",
                         )
-                        
+
                         if secret_response and "data" in secret_response and "data" in secret_response["data"]:
                             secret_data = secret_response["data"]["data"]
-                            
+
                             # Create VaultSecret objects for each key-value pair
                             for key, value in secret_data.items():
                                 secrets.append(
@@ -339,5 +339,5 @@ def read_secrets(
     except Exception:
         # Return empty list if listing fails
         pass
-    
+
     return secrets

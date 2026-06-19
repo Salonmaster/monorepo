@@ -7,10 +7,10 @@ import core
 def status():
     """Check the status of Vault."""
     typer.secho("🔍 Checking Vault status...", fg=typer.colors.BRIGHT_BLUE)
-    
+
     namespace = core.Backbone().context.vault_namespace
     pod_name = core.Backbone().context.vault_pod_name
-    
+
     try:
         is_connected = asyncio.run(vault_helper.check_vault_connection())
         if is_connected:

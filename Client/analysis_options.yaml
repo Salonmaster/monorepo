@@ -1,4 +1,4 @@
-include "**/*.dart"
+include: package:flutter_lints/flutter.yaml
 
 analyzer:
   strong-mode:

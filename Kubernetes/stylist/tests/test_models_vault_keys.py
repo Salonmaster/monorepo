@@ -26,10 +26,10 @@ def test_vault_keys_print_keys():
         unseal_keys=["key1", "key2"],
         root_token="root-token"
     )
-    
+
     with patch("stylist.models.vault_keys.typer.secho") as mock_secho:
         keys.print_keys()
-        
+
         # Should print 2 unseal keys + 1 root token = 3 calls
         assert mock_secho.call_count == 3
         calls = [str(call) for call in mock_secho.call_args_list]
@@ -41,10 +41,10 @@ def test_vault_keys_print_keys():
 def test_vault_keys_empty_keys():
     """Test VaultKeys with empty unseal keys."""
     keys = VaultKeys(unseal_keys=[], root_token="token")
-    
+
     with patch("stylist.models.vault_keys.typer.secho") as mock_secho:
         keys.print_keys()
-        
+
         # Should only print root token
         assert mock_secho.call_count == 1
         assert any("Root Token" in str(call) for call in mock_secho.call_args_list)

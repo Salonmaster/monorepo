@@ -481,12 +481,12 @@ def sync_secrets(
 ):
     """Sync secrets between the database and HashiCorp Vault."""
     from stylist.helpers import vault
-    
+
     if not db:
         raise typer.BadParameter("Database path required")
-    
+
     db_path, handle = _resolve_secrets_db(db)
-    
+
     try:
         # Get vault token
         token = vault_token
@@ -495,10 +495,10 @@ def sync_secrets(
                 token = core.Backbone().context.vault_keys.root_token
             else:
                 raise typer.BadParameter("Vault token required (use --vault-token or set in context)")
-        
+
         # Get vault URL
         vault_url_final = vault_url
-        
+
         # Load secrets from database
         env_enum = environment if environment else None
         db_secrets = helpers.database.load_secrets(
@@ -506,9 +506,9 @@ def sync_secrets(
             password=password,
             env=env_enum,
         )
-        
+
         typer.echo(f"📊 Found {len(db_secrets)} secrets in database")
-        
+
         # Load secrets from Vault
         with vault.port_forward_vault() as port_forward_url:
             vault_url_to_use = vault_url_final or port_forward_url
@@ -518,9 +518,9 @@ def sync_secrets(
                 namespace=namespace,
                 name=name,
             )
-        
+
         typer.echo(f"📊 Found {len(vault_secrets)} secrets in Vault")
-        
+
         # Create lookup dictionaries for comparison
         db_lookup = {
             (s.namespace, s.name, s.key): s
@@ -530,18 +530,18 @@ def sync_secrets(
             (s.namespace, s.name, s.key): s
             for s in vault_secrets
         }
-        
+
         # Find differences
         db_only = []
         vault_only = []
         different = []
-        
+
         all_keys = set(db_lookup.keys()) | set(vault_lookup.keys())
-        
+
         for key in all_keys:
             db_secret = db_lookup.get(key)
             vault_secret = vault_lookup.get(key)
-            
+
             if db_secret and not vault_secret:
                 db_only.append(db_secret)
             elif vault_secret and not db_secret:
@@ -549,36 +549,36 @@ def sync_secrets(
             elif db_secret and vault_secret:
                 if db_secret.value != vault_secret.value:
                     different.append((db_secret, vault_secret))
-        
+
         # Report differences
         if db_only:
             typer.echo(f"\n🔵 Secrets only in database ({len(db_only)}):")
             for secret in db_only:
                 typer.echo(f"  - {secret.namespace}/{secret.name}.{secret.key}")
-        
+
         if vault_only:
             typer.echo(f"\n🟢 Secrets only in Vault ({len(vault_only)}):")
             for secret in vault_only:
                 typer.echo(f"  - {secret.namespace}/{secret.name}.{secret.key}")
-        
+
         if different:
             typer.echo(f"\n🟡 Secrets with different values ({len(different)}):")
             for db_sec, vault_sec in different:
                 typer.echo(f"  - {db_sec.namespace}/{db_sec.name}.{db_sec.key}")
                 typer.echo(f"    DB:    {db_sec.value[:20]}..." if len(db_sec.value or '') > 20 else f"    DB:    {db_sec.value}")
                 typer.echo(f"    Vault: {vault_sec.value[:20]}..." if len(vault_sec.value or '') > 20 else f"    Vault: {vault_sec.value}")
-        
+
         if not db_only and not vault_only and not different:
             typer.secho("\n✅ Database and Vault are in sync!", fg=typer.colors.GREEN)
             return
-        
+
         # Perform sync if not dry run
         if dry_run:
             typer.secho("\n🔍 Dry run - no changes made", fg=typer.colors.YELLOW)
             return
-        
+
         synced_count = 0
-        
+
         # Sync database to Vault
         if direction in ("db-to-vault", "both"):
             if db_only or different:
@@ -587,7 +587,7 @@ def sync_secrets(
                     secrets_to_sync.append(secret)
                 for db_sec, _ in different:
                     secrets_to_sync.append(db_sec)
-                
+
                 if secrets_to_sync:
                     typer.echo(f"\n📤 Syncing {len(secrets_to_sync)} secrets from database to Vault...")
                     with vault.port_forward_vault() as port_forward_url:
@@ -597,7 +597,7 @@ def sync_secrets(
                             typer.secho(f"✅ Synced {len(secrets_to_sync)} secrets to Vault", fg=typer.colors.GREEN)
                         else:
                             typer.secho("❌ Failed to sync secrets to Vault", fg=typer.colors.RED)
-        
+
         # Sync Vault to database
         if direction in ("vault-to-db", "both"):
             if vault_only or different:
@@ -606,7 +606,7 @@ def sync_secrets(
                     secrets_to_sync.append(secret)
                 for _, vault_sec in different:
                     secrets_to_sync.append(vault_sec)
-                
+
                 if secrets_to_sync:
                     typer.echo(f"\n📥 Syncing {len(secrets_to_sync)} secrets from Vault to database...")
                     for secret in secrets_to_sync:
@@ -624,7 +624,7 @@ def sync_secrets(
                     typer.secho(f"✅ Synced {len(secrets_to_sync)} secrets to database", fg=typer.colors.GREEN)
                     if handle:
                         handle.mark_dirty()
-        
+
         if synced_count > 0:
             typer.secho(f"\n✅ Sync complete! Synced {synced_count} secrets.", fg=typer.colors.GREEN)
     finally:

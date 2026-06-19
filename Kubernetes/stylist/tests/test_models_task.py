@@ -38,7 +38,7 @@ def test_task_initialization():
 def test_task_run_not_implemented():
     """Test that base Task.run() raises NotImplementedError."""
     task = Task(name="base-task")
-    
+
     with pytest.raises(NotImplementedError):
         asyncio.run(task.run())
 
@@ -56,7 +56,7 @@ def test_task_with_dependencies():
     dep1 = MockTask(name="dep1")
     dep2 = MockTask(name="dep2")
     task = MockTask(name="main", dependencies=[dep1, dep2])
-    
+
     assert len(task.dependencies) == 2
     assert dep1 in task.dependencies
     assert dep2 in task.dependencies
