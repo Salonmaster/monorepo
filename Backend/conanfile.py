@@ -9,10 +9,10 @@ class BackendRecipe(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps"
     requires = [
         "drogon/1.9.13",
-        "spdlog/1.15.2",
-        "cli11/2.5.0",
-        "glaze/5.4.0",
-        "jsoncpp/1.9.6"
+        "spdlog/[>=1.13 <2]",
+        "cli11/[>=2.4 <3]",
+        "glaze/[>=5.3 <6]",
+        "jsoncpp/1.9.5"
     ]
     def configure(self):
         self.options["drogon"].with_ctl = True
