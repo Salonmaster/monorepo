@@ -1,0 +1,74 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jidicula/clang-format-action@v4
+        with:
+          clang-format-version: '18'
+          check-path: Backend
+
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: cd Client && flutter pub get && flutter analyze
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: cd Docs && pip install poetry && poetry install
+      - uses: chartboost/ruff-action@v1
+        with:
+          src: Docs
+
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: cd Kubernetes && pip install poetry && poetry install
+      - uses: chartboost/ruff-action@v1
+        with:
+          src: Kubernetes/stylist
+      - uses: azure/setup-helm@v4
+      - run: cd Kubernetes && helm lint apps/*/
+      - uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_file_or_dir: Kubernetes/apps/
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: cd Terraform && terraform fmt -check -recursive
+      - uses: terraform-linters/setup-tflint@v4
+      - run: cd Terraform && tflint --recursive
+
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: cd Website && composer install --no-interaction --prefer-dist && ./vendor/bin/pint --test
