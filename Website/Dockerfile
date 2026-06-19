@@ -8,48 +8,43 @@ RUN npm ci --production=false
 COPY . .
 RUN npx mix --production 2>/dev/null || npm run build 2>/dev/null || true
 RUN rm -rf node_modules
-# Ensure public/ exists even if frontend build skipped
 RUN mkdir -p public/build && touch public/mix-manifest.json
 
-# Stage 2: Production runtime
+# Stage 2: Install PHP dependencies
+FROM composer:2 AS composer
+WORKDIR /app
+COPY . .
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Stage 3: Production runtime
 FROM alpine:3.21
 
 RUN adduser -D -g 'www' www
 
 RUN apk add --no-cache \
     supervisor nginx \
-    php82 php82-fpm php82-dom php82-xml php82-pcntl php82-iconv \
-    php82-session php82-openssl php82-mbstring php82-fileinfo \
-    php82-tokenizer php82-xmlwriter php82-pdo php82-pdo_pgsql \
-    php82-pecl-redis php82-ctype php82-curl php82-phar
+    php84 php84-fpm php84-dom php84-xml php84-pcntl php84-iconv \
+    php84-session php84-openssl php84-mbstring php84-fileinfo \
+    php84-tokenizer php84-xmlwriter php84-pdo php84-pdo_pgsql \
+    php84-pecl-redis php84-ctype php84-curl php84-phar
 
-RUN ln -sf /usr/bin/php82 /usr/bin/php
+RUN ln -sf /usr/bin/php84 /usr/bin/php
 
 WORKDIR /www
 
-# Copy everything from builder (code + built assets)
 COPY --from=builder /app /www
+COPY --from=composer /app/vendor /www/vendor
 
-# Install production PHP deps
-# apk composer pulls php83, but runtime uses php82 — add php83 extensions for build scripts
-RUN apk add --no-cache composer php83-dom php83-session php83-fileinfo php83-tokenizer && \
-    composer install --no-dev --optimize-autoloader --no-interaction && \
-    apk del composer
-
-# Copy configs
-COPY docker/website/www.conf /etc/php82/php-fpm.d/www.conf
+COPY docker/website/www.conf /etc/php84/php-fpm.d/www.conf
 COPY docker/website/nginx.conf /etc/nginx/nginx.conf
 COPY docker/website/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copy php-log.ini if it exists
 RUN if [ -f /www/docker/website/php-log.ini ]; then \
-        cp /www/docker/website/php-log.ini /etc/php82/php-fpm.d/php-log.conf; \
+        cp /www/docker/website/php-log.ini /etc/php84/php-fpm.d/php-log.conf; \
     fi
 
-# Remove docker dir from final image
 RUN rm -rf /www/docker /www/.git /www/node_modules 2>/dev/null || true
 
-# Setup Laravel
 RUN php artisan event:cache 2>/dev/null || true; \
     php artisan route:cache 2>/dev/null || true; \
     php artisan view:cache 2>/dev/null || true; \

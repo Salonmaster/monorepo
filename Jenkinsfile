@@ -39,21 +39,20 @@ pipeline {
                     }
                 }
 
-                stage('Docs - Lint & Audit') {
+                stage('Docs - Lint') {
                     steps {
                         sh '''
                             docker run --rm \
                                 -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
-                                pip install --upgrade pip poetry pip-audit && \
+                                pip install --upgrade pip poetry && \
                                 poetry install --no-root && \
-                                poetry run ruff check . && \
-                                pip-audit
+                                poetry run ruff check .
                             "
                         '''
                     }
                 }
 
-                stage('Kubernetes - Lint & Audit') {
+                stage('Kubernetes - Lint') {
                     steps {
                         sh '''
                             docker run -i --rm \
@@ -70,23 +69,107 @@ for chart in apps/*/; do
     fi
 done
 
-pip install --upgrade pip poetry pip-audit
+pip install --upgrade pip poetry
 poetry install --no-root --with dev
 poetry run ruff check stylist/
 poetry run pytest
+HEREDOC_END
+                        '''
+                    }
+                }
+
+                stage('Website - Lint') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                                -v "$PWD/Website:/app:Z" -w /app composer:2 sh -c "
+                                composer install --no-interaction --prefer-dist && \
+                                ./vendor/bin/pint --test
+                            "
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            stages {
+                stage('Backend - Build') {
+                    steps {
+                        dir('Backend') {
+                            sh 'docker build -t salonmaster-backend .'
+                        }
+                    }
+                }
+
+                stage('Website - Build') {
+                    steps {
+                        dir('Website') {
+                            sh 'docker build -t salonmaster-website .'
+                        }
+                    }
+                }
+
+                stage('Docs - Build') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                                -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
+                                pip install poetry && \
+                                poetry install --no-root && \
+                                poetry run mkdocs build --strict
+                            "
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Security Scan') {
+            parallel {
+                stage('Backend - Trivy Image') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                                -v /var/run/docker.sock:/var/run/docker.sock:Z \
+                                aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 \
+                                salonmaster-backend:latest || true
+                        '''
+                    }
+                }
+
+                stage('Docs - pip-audit') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                                -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
+                                pip install --upgrade pip poetry pip-audit && \
+                                poetry install --no-root && \
+                                pip-audit
+                            "
+                        '''
+                    }
+                }
+
+                stage('Kubernetes - pip-audit') {
+                    steps {
+                        sh '''
+                            docker run -i --rm \
+                                -v "$PWD/Kubernetes:/work:Z" -w /work python:3.12-alpine sh -s <<'HEREDOC_END'
+pip install --upgrade pip poetry pip-audit
+poetry install --no-root --with dev
 pip-audit
 HEREDOC_END
                         '''
                     }
                 }
 
-                stage('Website - Lint & Audit') {
+                stage('Website - Composer Audit') {
                     steps {
                         sh '''
                             docker run --rm \
                                 -v "$PWD/Website:/app:Z" -w /app composer:2 sh -c "
                                 composer install --no-interaction --prefer-dist && \
-                                ./vendor/bin/pint --test && \
                                 composer audit || true
                             "
                         '''
@@ -95,48 +178,7 @@ HEREDOC_END
             }
         }
 
-        stage('Backend - Build') {
-            steps {
-                dir('Backend') {
-                    sh 'docker build -t salonmaster-backend .'
-                }
-            }
-            post {
-                success {
-                    sh '''
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock:Z \
-                            aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 salonmaster-backend:latest || true
-                    '''
-                }
-            }
-        }
-
-        stage('Website - Build') {
-            steps {
-                dir('Website') {
-                    sh 'docker build -t salonmaster-website .'
-                }
-            }
-        }
-
-        stage('Docs - Build') {
-            steps {
-                sh '''
-                    docker run --rm \
-                        -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
-                        pip install poetry && \
-                        poetry install --no-root && \
-                        poetry run mkdocs build --strict
-                    "
-                '''
-            }
-        }
-
         stage('Publish') {
-            when {
-                branch 'main'
-            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'harbor-registry',
@@ -146,13 +188,11 @@ HEREDOC_END
                     sh '''
                         echo "$HARBOR_PASS" | docker login "$HARBOR_REGISTRY" -u "$HARBOR_USER" --password-stdin
 
-                        # Tag and push Backend
                         docker tag salonmaster-backend "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:$BUILD_NUMBER"
                         docker tag salonmaster-backend "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:latest"
                         docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:$BUILD_NUMBER"
                         docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:latest"
 
-                        # Tag and push Website
                         docker tag salonmaster-website "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:$BUILD_NUMBER"
                         docker tag salonmaster-website "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:latest"
                         docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:$BUILD_NUMBER"
