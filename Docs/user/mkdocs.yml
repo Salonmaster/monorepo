@@ -1,0 +1,71 @@
+site_name: SalonMaster Help Center
+site_description: Guides and tutorials for SalonMaster POS — built for hair, nail & beauty salons
+site_author: SalonMaster
+site_url: https://docs.salonmaster.dev
+
+theme:
+  name: material
+  palette:
+    primary: deep purple
+    accent: pink
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - content.code.copy
+  logo: assets/logo.svg
+  favicon: assets/favicon.png
+
+nav:
+  - Welcome: index.md
+  - Getting Started:
+      - Quick Start: getting-started/quick-start.md
+      - Setting Up Your Salon: getting-started/setup.md
+      - Adding Staff: getting-started/staff.md
+      - First Appointment: getting-started/first-appointment.md
+  - Dashboard: dashboard/overview.md
+  - Appointments:
+      - Calendar View: appointments/calendar.md
+      - Booking: appointments/booking.md
+      - Waitlist: appointments/waitlist.md
+      - Online Booking: appointments/online-booking.md
+  - Clients:
+      - Client Profiles: clients/profiles.md
+      - Client History: clients/history.md
+      - Loyalty & Rewards: clients/loyalty.md
+  - Point of Sale:
+      - Checkout Flow: pos/checkout.md
+      - Payments: pos/payments.md
+      - Refunds: pos/refunds.md
+      - Gift Cards: pos/gift-cards.md
+  - Inventory:
+      - Products: inventory/products.md
+      - Stock Management: inventory/stock.md
+      - Purchase Orders: inventory/purchase-orders.md
+  - Staff:
+      - Roles & Permissions: staff/roles.md
+      - Schedules: staff/schedules.md
+      - Commissions: staff/commissions.md
+  - Reports:
+      - Daily Summary: reports/daily.md
+      - Revenue: reports/revenue.md
+      - Tips & Commissions: reports/tips.md
+      - Export: reports/export.md
+  - Settings:
+      - Salon Profile: settings/salon.md
+      - Services & Pricing: settings/services.md
+      - Tax & Invoices: settings/tax.md
+      - Integrations: settings/integrations.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true

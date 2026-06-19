@@ -110,7 +110,7 @@ HEREDOC_END
                     }
                 }
 
-                stage('Docs - Build') {
+                stage('Docs - Build Tech') {
                     steps {
                         sh '''
                             docker run --rm \
@@ -118,6 +118,18 @@ HEREDOC_END
                                 pip install poetry && \
                                 poetry install --no-root && \
                                 poetry run mkdocs build --strict
+                            "
+                        '''
+                    }
+                }
+
+                stage('Docs - Build User') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                                -v "$PWD/Docs/user:/work:Z" -w /work python:3.12-alpine sh -c "
+                                pip install mkdocs-material && \
+                                mkdocs build --strict
                             "
                         '''
                     }
