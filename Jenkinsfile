@@ -12,7 +12,8 @@ pipeline {
                 stage('Backend - Lint') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD/Backend:/work" -w /work alpine:3.21 sh -c "
+                            docker run --rm \
+                                -v "$PWD/Backend:/work:Z" -w /work alpine:3.21 sh -c "
                                 apk add --no-cache clang-extra-tools && \
                                 find src -name '*.cpp' -o -name '*.h' -o -name '*.cc' \
                                     -exec clang-format --dry-run --Werror {} +
@@ -24,7 +25,9 @@ pipeline {
                 stage('Client - Analyze & Test') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD/Client:/app" -w /app ghcr.io/cirruslabs/flutter:3.29.3 sh -c "
+                            docker run --rm \
+                                -v "$PWD/Client:/app:Z" -w /app \
+                                ghcr.io/cirruslabs/flutter:3.29.3 sh -c "
                                 flutter pub get && flutter analyze && flutter test
                             "
                         '''
@@ -34,7 +37,8 @@ pipeline {
                 stage('Docs - Lint') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD/Docs:/work" -w /work python:3.12-alpine sh -c "
+                            docker run --rm \
+                                -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
                                 pip install poetry && \
                                 poetry install --no-root && \
                                 poetry run ruff check .
@@ -46,7 +50,8 @@ pipeline {
                 stage('Kubernetes - Lint') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD/Kubernetes:/work" -w /work python:3.12-alpine sh -c "
+                            docker run --rm \
+                                -v "$PWD/Kubernetes:/work:Z" -w /work python:3.12-alpine sh -c "
                                 wget -qO- https://get.helm.sh/helm-v3.17.3-linux-amd64.tar.gz | tar xz && \
                                 mv linux-amd64/helm /usr/local/bin/helm && \
                                 for chart in apps/*/; do
@@ -69,7 +74,9 @@ pipeline {
                 stage('Terraform - Validate') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD/Terraform:/work" -w /work --entrypoint= hashicorp/terraform:1.15.6 sh -c "
+                            docker run --rm \
+                                -v "$PWD/Terraform:/work:Z" -w /work --entrypoint= \
+                                hashicorp/terraform:1.15.6 sh -c "
                                 terraform fmt -check -recursive && \
                                 terraform init -backend=false && \
                                 terraform validate
@@ -81,10 +88,8 @@ pipeline {
                 stage('Website - Lint') {
                     steps {
                         sh '''
-                            docker run --rm -v "$PWD/Website:/work" -w /work php:8.4-cli-alpine sh -c "
-                                php -r \"copy('https://getcomposer.org/installer', 'composer-setup.php');\" && \
-                                php composer-setup.php --quiet && \
-                                mv composer.phar /usr/local/bin/composer && \
+                            docker run --rm \
+                                -v "$PWD/Website:/app:Z" -w /app composer:2 sh -c "
                                 composer install --no-interaction --prefer-dist && \
                                 ./vendor/bin/pint --test
                             "
@@ -105,7 +110,8 @@ pipeline {
         stage('Docs - Build') {
             steps {
                 sh '''
-                    docker run --rm -v "$PWD/Docs:/work" -w /work python:3.12-alpine sh -c "
+                    docker run --rm \
+                        -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
                         pip install poetry && \
                         poetry install --no-root && \
                         poetry run mkdocs build --strict
