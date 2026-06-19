@@ -8,12 +8,11 @@ class BackendRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeToolchain", "CMakeDeps"
     requires = [
-        "drogon/1.9.10",
-        "trantor/[>=1.5.21 <1.5.26]",
-        "spdlog/1.13.0",
-        "cli11/2.4.1",
-        "glaze/5.3.0",
-        "jsoncpp/1.9.5"
+        "drogon/1.9.13",
+        "spdlog/1.15.2",
+        "cli11/2.5.0",
+        "glaze/5.4.0",
+        "jsoncpp/1.9.6"
     ]
     def configure(self):
         self.options["drogon"].with_ctl = True

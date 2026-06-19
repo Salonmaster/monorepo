@@ -2,6 +2,7 @@
 #include <Helpers/SessionCrypto.h>
 #include <drogon/drogon.h>
 #include <drogon/orm/Mapper.h>
+
 #include "Models/Sessions.h"
 class SessionMiddleware : public drogon::HttpMiddleware<SessionMiddleware> {
 public:
