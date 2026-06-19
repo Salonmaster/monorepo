@@ -6,6 +6,11 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    environment {
+        HARBOR_REGISTRY = 'harbor.void-zero.com'
+        HARBOR_PROJECT = 'salonmaster'
+    }
+
     stages {
         stage('Lint & Analyze') {
             parallel {
@@ -126,6 +131,14 @@ HEREDOC_END
             }
         }
 
+        stage('Website - Build') {
+            steps {
+                dir('Website') {
+                    sh 'docker build -t salonmaster-website .'
+                }
+            }
+        }
+
         stage('Docs - Build') {
             steps {
                 sh '''
@@ -136,6 +149,38 @@ HEREDOC_END
                         poetry run mkdocs build --strict
                     "
                 '''
+            }
+        }
+
+        stage('Publish') {
+            when {
+                branch 'main'
+            }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'harbor-registry',
+                    usernameVariable: 'HARBOR_USER',
+                    passwordVariable: 'HARBOR_PASS'
+                )]) {
+                    sh '''
+                        echo "$HARBOR_PASS" | docker login "$HARBOR_REGISTRY" -u "$HARBOR_USER" --password-stdin
+
+                        # Tag and push Backend
+                        docker tag salonmaster-backend "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:$BUILD_NUMBER"
+                        docker tag salonmaster-backend "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:latest"
+                        docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:$BUILD_NUMBER"
+                        docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/backend:latest"
+
+                        # Tag and push Website
+                        docker tag salonmaster-website "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:$BUILD_NUMBER"
+                        docker tag salonmaster-website "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:latest"
+                        docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:$BUILD_NUMBER"
+                        docker push "$HARBOR_REGISTRY/$HARBOR_PROJECT/website:latest"
+
+                        docker logout "$HARBOR_REGISTRY"
+                        echo "Published backend:$BUILD_NUMBER and website:$BUILD_NUMBER to Harbor"
+                    '''
+                }
             }
         }
     }
