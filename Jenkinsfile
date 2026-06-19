@@ -1,6 +1,30 @@
 pipeline {
     agent any
     
+    triggers {
+        genericTrigger {
+            token('salonmaster-webhook')
+            genericVariables {
+                genericVariable {
+                    key('ref')
+                    value('\$.ref')
+                }
+            }
+            genericRequestVariables {
+                genericRequestVariable {
+                    key('scm_manager_branch')
+                    regexpFilter('.*')
+                }
+            }
+            regexpFilterText('\$ref')
+            regexpFilterExpression('refs/heads/main')
+            causeString('SCM-Manager push on \$ref')
+            printContributedVariables(false)
+            printPostContent(true)
+            silentResponse(false)
+        }
+    }
+    
     options {
         buildDiscarder(logRotator(numToKeepStr: '30'))
         disableConcurrentBuilds()
