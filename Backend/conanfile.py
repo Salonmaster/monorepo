@@ -9,6 +9,7 @@ class BackendRecipe(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps"
     requires = [
         "drogon/1.9.10",
+        "trantor/1.5.18",
         "spdlog/1.13.0",
         "cli11/2.4.1",
         "glaze/5.3.0",

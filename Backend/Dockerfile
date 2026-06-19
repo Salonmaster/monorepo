@@ -1,4 +1,4 @@
-FROM alpine:latest AS builder
+FROM alpine:3.21 AS builder
 
 RUN apk add --no-cache \
     build-base \
@@ -6,6 +6,7 @@ RUN apk add --no-cache \
     git \
     python3 \
     py3-pip \
+    py3-numpy \
     libuv-dev \
     openssl-dev \
     zlib-dev \
@@ -31,17 +32,18 @@ RUN ARCH=$(uname -m) && \
     else \
         echo "Unsupported architecture: $ARCH" && exit 1; \
     fi && \
+    GCC_VER=$(gcc -dumpversion | cut -d. -f1) && \
     /venv/bin/conan profile detect --force && \
     printf "[settings]\n\
 os=Linux\n\
 arch=%s\n\
 compiler=gcc\n\
-compiler.version=12\n\
+compiler.version=%s\n\
 compiler.libcxx=libstdc++11\n\
 compiler.cppstd=23\n\
 build_type=Release\n\
 [options]\n\
-*:shared=False\n" "$CONAN_ARCH" > ~/.conan2/profiles/default
+*:shared=False\n" "$CONAN_ARCH" "$GCC_VER" > ~/.conan2/profiles/default
 
 RUN /venv/bin/conan install . --build=missing -s build_type=Release -v status
 
