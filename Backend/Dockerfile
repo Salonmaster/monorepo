@@ -15,6 +15,7 @@ RUN apk add --no-cache \
     linux-headers \
     perl-utils \
     boost-dev \
+    lz4-dev \
     upx
 
 # Conan setup
