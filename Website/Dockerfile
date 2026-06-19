@@ -31,8 +31,10 @@ WORKDIR /www
 COPY --from=builder /app /www
 
 # Install production PHP deps
+# apk composer depends on php83, but runtime uses php82 — ignore platform reqs
 RUN apk add --no-cache composer && \
-    composer install --no-dev --optimize-autoloader --no-interaction && \
+    composer install --no-dev --optimize-autoloader --no-interaction \
+        --ignore-platform-reqs && \
     apk del composer
 
 # Copy configs
