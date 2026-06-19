@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "salonmaster-docs"
+version = "0.1.0"
+description = "Salonmaster documentation site"
+authors = ["Salonmaster Team <dev@example.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mkdocs = "^1.6.0"
+mkdocs-material = "^9.5.0"
+pymdown-extensions = "^10.8"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"

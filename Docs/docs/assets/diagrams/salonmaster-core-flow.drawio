@@ -1,0 +1,76 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="SalonMaster Core Flow" id="sm-flow">
+    <mxGraphModel dx="1222" dy="714" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Client Entry -->
+        <mxCell id="entry-book" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Client Booking&lt;br&gt;(Phone/Web/Reception)" vertex="1">
+          <mxGeometry height="50" width="180" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="entry-walkin" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Walk-In&lt;br&gt;(Reception)" vertex="1">
+          <mxGeometry height="50" width="180" x="40" y="160" as="geometry" />
+        </mxCell>
+        <!-- Appointment -->
+        <mxCell id="appt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Appointment System&lt;br&gt;· Calendar&lt;br&gt;· Staff Assignment&lt;br&gt;· Reminders" vertex="1">
+          <mxGeometry height="90" width="180" x="280" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-booking-appt" edge="1" parent="1" source="entry-book" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="appt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-walkin-appt" edge="1" parent="1" source="entry-walkin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="appt">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="185"/><mxPoint x="250" y="105"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <!-- Service Delivery -->
+        <mxCell id="service" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Service Delivery&lt;br&gt;· Service Selection&lt;br&gt;· Client Notes&lt;br&gt;· Duration Tracking" vertex="1">
+          <mxGeometry height="90" width="180" x="520" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-appt-service" edge="1" parent="1" source="appt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Checkout -->
+        <mxCell id="checkout" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Checkout / POS&lt;br&gt;· Service Total&lt;br&gt;· Product Add-ons&lt;br&gt;· Discounts&lt;br&gt;· Receipt" vertex="1">
+          <mxGeometry height="110" width="180" x="760" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-service-checkout" edge="1" parent="1" source="service" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="checkout">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Payment -->
+        <mxCell id="payment" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Payment&lt;br&gt;· Cash / Card&lt;br&gt;· Invoice&lt;br&gt;· Split Payment&lt;br&gt;· Tip" vertex="1">
+          <mxGeometry height="110" width="180" x="990" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-checkout-pay" edge="1" parent="1" source="checkout" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="payment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Post-service -->
+        <mxCell id="history" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Client History Update&lt;br&gt;· Visit Record&lt;br&gt;· Preferences&lt;br&gt;· Loyalty Points" vertex="1">
+          <mxGeometry height="80" width="180" x="990" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-pay-history" edge="1" parent="1" source="payment" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="history">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Parallel: Inventory -->
+        <mxCell id="inventory" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Inventory Check&lt;br&gt;· Stock Deduction&lt;br&gt;· Low-Stock Alert" vertex="1">
+          <mxGeometry height="80" width="180" x="760" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-checkout-inv" edge="1" parent="1" source="checkout" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="inventory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Reporting -->
+        <mxCell id="reports" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Reporting Engine&lt;br&gt;· Daily Revenue&lt;br&gt;· Staff Performance&lt;br&gt;· Service Popularity" vertex="1">
+          <mxGeometry height="80" width="220" x="270" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-history-reports" edge="1" parent="1" source="history" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="reports">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-inv-reports" edge="1" parent="1" source="inventory" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="reports">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="600" y="280"/><mxPoint x="600" y="280"/></Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

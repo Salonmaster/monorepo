@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+spec:
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+        timestamp: {{ now | quote }}
+      {{- end }}
+      labels:
+        date: "{{ now | unixEpoch }}"
+        app: worker
+        {{ .Release.Name }}-redis-client: "true"
+        {{ .Release.Name }}-syslog-client: "true"
+        {{ .Release.Name }}-postgresql-client: "true"
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "salonmaster-website.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            capabilities:
+              add:
+              - CAP_NET_BIND_SERVICE
+            readOnlyRootFilesystem: false
+            runAsNonRoot: false
+            runAsUser: 0
+          image: "ghcr.io/salonmaster/salonmaster-worker:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+          volumeMounts:
+          - name: redis-certificate
+            mountPath: "/etc/certificates"
+            readOnly: true
+          - mountPath: /tmp
+            name: cache-volume
+          - name: config
+            mountPath: /www/.env
+            subPath: ".env"
+            readOnly: true
+          - name: mailserver-credentials
+            mountPath: /etc/postfix/sasl_passwd
+            subPath: "sasl_passwd"
+            readOnly: true
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-redis 
+                  key: redis-password
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+      volumes:
+          - name: redis-certificate
+            secret:
+              secretName: {{ .Release.Name }}-redis-crt 
+              items:
+              - key: ca.crt
+                path: redis-ca.crt
+          - name: cache-volume
+            emptyDir:
+              sizeLimit: 500Mi
+          - name: config
+            configMap:
+              name: {{ .Release.Name }}-website
+              items:
+              - key: .env
+                path: .env
+          - name: mailserver-credentials
+            secret:
+              secretName: {{ .Release.Name }}-email-relay
+              items:
+              - key: sasl_passwd
+                path: sasl_passwd
+      initContainers:
+        - name: init-redis
+          image: busybox:1.28
+          command: ['sh', '-c', "until nslookup {{ .Release.Name }}-redis.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for Redis; sleep 2; done"]
+        - name: init-postgresql
+          image: busybox:1.28
+          command: ['sh', '-c', "until nslookup {{ .Release.Name }}-postgresql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for postgresql; sleep 2; done"]
+        - name: database-migration
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['sh', '-c', 'cd /www; php /www/artisan config:cache; php artisan migrate --no-interaction --isolated']
+          volumeMounts:
+          - name: redis-certificate
+            mountPath: "/etc/certificates"
+            readOnly: true
+          - mountPath: /tmp
+            name: cache-volume
+          - name: config
+            mountPath: /www/.env
+            subPath: ".env"
+            readOnly: true
+          env:  
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-redis 
+                  key: redis-password
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+
+          
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,30 @@
+{{- $root := . -}}
+{{- range $app := .Values.apps }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $app.name }}
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/instance: app-of-apps
+spec:
+  project: default
+  destination:
+    namespace: {{ $app.namespace }}
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: {{ $root.Values.gitUrl }}
+    targetRevision: HEAD
+    path: {{ $root.Values.appsPath }}{{ $app.name }}
+    helm:
+      valueFiles:
+        - values-{{ $root.Values.env }}.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ApplyOutOfSyncOnly={{ $app.autosync }}
+      - CreateNamespace=true
+---
+{{- end }}

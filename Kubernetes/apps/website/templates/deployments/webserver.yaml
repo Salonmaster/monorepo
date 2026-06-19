@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "salonmaster-website.fullname" . }}
+  labels:
+    {{- include "salonmaster-website.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "salonmaster-website.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+        timestamp: {{ now | quote }}
+      {{- end }}
+      labels:
+        date: "{{ now | unixEpoch }}"
+        {{- include "salonmaster-website.selectorLabels" . | nindent 8 }}
+        {{ .Release.Name }}-redis-client: "true"
+        {{ .Release.Name }}-syslog-client: "true"
+        {{ .Release.Name }}-postgresql-client: "true"
+
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "salonmaster-website.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: redis-certificate
+            mountPath: "/etc/certificates"
+            readOnly: true
+          - mountPath: /tmp
+            name: cache-volume
+          - name: config
+            mountPath: /www/.env
+            subPath: ".env"
+            readOnly: true
+          - name: nginx
+            mountPath: /etc/nginx/nginx.conf
+            subPath: "nginx.conf"
+            readOnly: true
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-redis 
+                  key: redis-password
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+      volumes:
+          - name: redis-certificate
+            secret:
+              secretName: {{ .Release.Name }}-redis-crt 
+              items:
+              - key: ca.crt
+                path: redis-ca.crt
+          - name: cache-volume
+            emptyDir:
+              sizeLimit: 500Mi
+          - name: config
+            configMap:
+              name: {{ .Release.Name }}-website
+              items:
+              - key: .env
+                path: .env
+          - name: nginx
+            configMap:
+              name: {{ .Release.Name }}-website
+              items:
+              - key: nginx.conf
+                path: nginx.conf
+      initContainers:
+        - name: init-redis
+          image: busybox:1.28
+          command: ['sh', '-c', "until nslookup {{ .Release.Name }}-redis.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for Redis; sleep 2; done"]
+        - name: init-postgresql
+          image: busybox:1.28
+          command: ['sh', '-c', "until nslookup {{ .Release.Name }}-postgresql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for PostgreSQL; sleep 2; done"]
+        - name: database-migration
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ['sh', '-c', 'cd /www; php /www/artisan config:cache; php artisan migrate --no-interaction --isolated']
+          volumeMounts:
+          - name: redis-certificate
+            mountPath: "/etc/certificates"
+            readOnly: true
+          - mountPath: /tmp
+            name: cache-volume
+          - name: config
+            mountPath: /www/.env
+            subPath: ".env"
+            readOnly: true
+          env:  
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-redis 
+                  key: redis-password
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-postgresql
+                  key: password
+
+          
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

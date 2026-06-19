@@ -1,0 +1,82 @@
+[tool.poetry]
+name = "stylist"
+version = "0.1.0"
+description = "Help with configuring and setting up k8s clusters [tst/acc/prd] for Salonmaster"
+authors = ["Benjamin Martens <bmartens@pm.me>"]
+readme = "README.md"
+packages = [{include = "stylist"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = "^0.20.0"
+kubernetes = "^34.1.0"
+rich = "^14.2.0"
+hvac = "^2.4.0"
+python-dotenv = "^1.2.1"
+kubernetes-asyncio = "^33.3.0"
+dotenv = "^0.9.9"
+textual = "^6.11.0"
+pyperclip = "^1.11.0"
+sqlcipher3-wheels = "^0.5.6"
+boto3 = "^1.42.13"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.2"
+pytest-cov = "^7.0.0"
+pytest-asyncio = "^1.3.0"
+ruff = "^0.14.10"
+commitizen = "^4.10.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+stylist = "stylist.main:run_stylist"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+src = ["stylist", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501", "E402", "F401", "F841"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "v$version"
+
+[tool.commitizen.customize]
+message_template = "{type}({scope}): {subject}\n\n{body}\n\n{footer}"
+example = "feat(website): add user authentication"
+schema = "<type>(<scope>): <subject>"
+bump_message = "chore(release): bump version to $current_version → $new_version"
+
+[tool.commitizen.cz_conventional_commits]
+customize = true
+types = [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "chore",
+    "revert",
+    "helm",
+    "k8s",
+]
+
+[[tool.commitizen.version_files]]
+path = "pyproject.toml"
+updater = "poetry"
+
+[tool.commitizen.version_provider]
+path = "pyproject.toml"
+search = "version = \"(.*)\""
+replace = "version = \"$1\""

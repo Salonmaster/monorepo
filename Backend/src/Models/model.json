@@ -1,0 +1,13 @@
+{
+  "rdbms": "postgresql",
+  "host": "127.0.0.1",
+  "port": 5432,
+  "dbname": "backend",
+  "user": "backend",
+  "passwd": "dasdasfsadfasfdssds",
+  "tables": ["code_verifiers", "sessions"],
+  "relationships": {
+      "enabled": false,
+      "items": []
+  }
+}

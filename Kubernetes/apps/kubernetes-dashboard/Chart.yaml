@@ -1,0 +1,14 @@
+apiVersion: v2
+appVersion: "1.0"
+description: A Helm chart for Kubernetes
+name: kubernetes-dashboard
+version: 0.1.0
+
+dependencies:
+- name: kubernetes-dashboard
+  version: 7.14.0
+  repository: https://kubernetes.github.io/dashboard/
+
+- name: oauth2-proxy
+  version: 10.0.0
+  repository: https://oauth2-proxy.github.io/manifests

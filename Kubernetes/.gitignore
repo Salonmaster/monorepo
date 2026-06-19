@@ -1,0 +1,8 @@
+*/charts/*
+*.tgz
+__pycache__/
+*.pyc
+.env
+Chart.lock
+*:Zone.Identifier
+venv

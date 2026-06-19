@@ -1,0 +1,69 @@
+Screen {
+    background: $surface;
+}
+
+#editor-body {
+    layout: grid;
+    grid-size: 2;
+    grid-columns: 3fr 2fr;
+    grid-rows: 1fr;
+    padding: 1 2;
+}
+
+#table-panel, #form-panel {
+    border: $accent;
+    background: $panel;
+    padding: 1;
+    height: 100%;
+}
+
+#table-panel {
+    border: dodgerblue;
+}
+
+#form-panel {
+    border: seagreen;
+}
+
+#table-title, #form-title {
+    text-style: bold;
+    padding-bottom: 1;
+}
+
+#table-toolbar {
+    layout: horizontal;
+    padding-bottom: 1;
+}
+
+#form-panel Input,
+#form-panel Select,
+#form-panel TextArea {
+    width: 100%;
+}
+
+#value-input {
+    height: 8;
+    min-height: 5;
+}
+
+.field-label {
+    color: $text-muted;
+    padding-top: 1;
+}
+
+#form-buttons {
+    layout: horizontal;
+    padding-top: 1;
+}
+
+Button#save-button {
+    width: 1fr;
+}
+
+Button#delete-button {
+    width: 1fr;
+}
+
+Button#reset-button {
+    width: 1fr;
+}

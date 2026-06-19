@@ -1,0 +1,55 @@
+site_name: Salonmaster Docs
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - navigation.instant
+    - navigation.expand
+    - navigation.tracking
+  icon:
+    logo: material/content-cut
+  palette:
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+      primary: pink
+      accent: purple
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+      primary: pink
+      accent: purple
+extra_css:
+  - stylesheets/softblush.css
+nav:
+  - Overview: index.md
+  - Application:
+      - Architecture: application/application.md
+      - Database: app/database.md
+  - Product:
+      - Overview: product/index.md
+      - Plan: product/plan.md
+      - Architecture: product/architecture.md
+      - Modules: product/modules.md
+      - Data Model: product/data-model.md
+  - Deployment:
+      - Docker Compose: deployment/docker-compose.md
+      - Kubernetes (Scale): tenants/keda.md
+  - Monitoring & Observability:
+      - Grafana & Metrics: monitoring/grafana.md
+      - Logging: monitoring/logging.md
+      - Alerts: monitoring/alerts.md
+  - CI/CD:
+      - GitHub Actions: cicd/github-actions.md
+  - Developer Guide: developer-guide.md
+  - FAQs: faq.md
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

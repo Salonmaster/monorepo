@@ -1,0 +1,31 @@
+keycloak:
+  auth:
+    existingSecret: keycloak-admin-credentials
+    passwordSecretKey: admin-password
+  postgresql:
+    enabled: false
+  externalDatabase:
+    enabled: true
+    host: database-system-postgresql.database-system.svc.cluster.local
+    port: 5432
+    database: keycloak
+    existingSecret: keycloak-database-credentials
+    existingSecretUserKey: username
+    existingSecretPasswordKey: password
+  production: true
+  proxy: "edge"
+  replicaCount: 1
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      labels:
+        release: monitoring
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "2Gi"

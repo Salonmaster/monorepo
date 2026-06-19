@@ -1,0 +1,17 @@
+kube-prometheus-stack:
+  crds:
+    enabled: false
+  prometheus:
+    prometheusSpec:
+      serviceMonitorNamespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: Exists
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: hetzner-cloud
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 10Gi

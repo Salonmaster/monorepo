@@ -1,0 +1,10 @@
+[run]
+branch = True
+source = stylist
+omit =
+    stylist/tests/*
+    tests/*
+
+[report]
+skip_empty = True
+show_missing = True

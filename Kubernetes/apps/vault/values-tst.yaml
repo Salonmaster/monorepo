@@ -1,0 +1,10 @@
+vault:
+  server:
+    replicaCount: 3
+    extraEnvVars:
+      - name: VAULT_LOG_LEVEL
+        value: debug
+  metrics:
+    enabled: true
+
+        

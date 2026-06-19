@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+:root {
+  --md-primary-fg-color: #F48FB1;
+  --md-primary-fg-color--light: #F8BBD0;
+  --md-primary-fg-color--dark: #AD1457;
+
+  --md-accent-fg-color: #BA68C8;
+  --md-accent-fg-color--light: #E1BEE7;
+  --md-accent-fg-color--dark: #7B1FA2;
+
+  --md-text-font: "Inter", sans-serif;
+  --transition-speed: 0.3s;
+
+}
+
+.md-typeset h1, .md-typeset h2, .md-typeset p {
+  transition: all 0.3s ease;
+}
+
+/* Add slight elevation to nav */
+.md-header {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+html {
+  transition: background-color var(--transition-speed) ease,
+              color var(--transition-speed) ease;
+}
+
+body,
+.md-typeset,
+.md-content,
+.md-sidebar,
+.md-header {
+  transition: background-color var(--transition-speed) ease,
+              color var(--transition-speed) ease;
+}

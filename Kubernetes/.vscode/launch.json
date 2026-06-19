@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Stylist: Database edit",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/stylist/main.py",
+            "args": ["database", "gui"],
+            "cwd": "${workspaceFolder}/stylist",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true
+        },
+        {
+            "name": "Stylist: Cluster Reset",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/stylist/main.py",
+            "args": ["cluster", "reset"],
+            "cwd": "${workspaceFolder}/stylist",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true
+        },
+        {
+            "name": "Stylist: Cluster Bootstrap",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/stylist/main.py",
+            "args": ["cluster", "bootstrap"],
+            "cwd": "${workspaceFolder}/stylist",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true
+        },
+        {
+            "name": "Stylist: Cluster redeploy",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/stylist/main.py",
+            "args": ["cluster", "redeploy"],
+            "cwd": "${workspaceFolder}/stylist",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true
+        }
+    ]
+}

@@ -1,0 +1,97 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="SalonMaster Client Architecture" id="sm-client">
+    <mxGraphModel dx="1528" dy="893" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Left edge: WebSocket -->
+        <mxCell id="ws" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="WebSocket&lt;br&gt;Connection" vertex="1">
+          <mxGeometry height="60" width="80" x="40" y="40" as="geometry" />
+        </mxCell>
+        <!-- Auth Middleware -->
+        <mxCell id="auth" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Auth Middleware&lt;br&gt;(JWT + Refresh)" vertex="1">
+          <mxGeometry height="60" width="80" x="160" y="40" as="geometry" />
+        </mxCell>
+        <!-- WS to Auth -->
+        <mxCell id="edge-ws-auth" edge="1" parent="1" source="ws" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- API Client -->
+        <mxCell id="api-client" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="API Client&lt;br&gt;(REST/WS)" vertex="1">
+          <mxGeometry height="60" width="80" x="40" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-apiclient-auth" edge="1" parent="1" source="api-client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Store (state management) -->
+        <mxCell id="store" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="App State&lt;br&gt;(Zustand/Redux)" vertex="1">
+          <mxGeometry height="60" width="100" x="300" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-auth-store" edge="1" parent="1" source="auth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Offline Queue -->
+        <mxCell id="offline" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;" value="Offline Queue&lt;br&gt;(IndexedDB)" vertex="1">
+          <mxGeometry height="60" width="100" x="300" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-apiclient-offline" edge="1" parent="1" source="api-client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="offline">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Local DB -->
+        <mxCell id="localdb" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;" value="SQLite&lt;br&gt;(Local)" vertex="1">
+          <mxGeometry height="60" width="60" x="470" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-store-localdb" edge="1" parent="1" source="store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="localdb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Pages / Views -->
+        <mxCell id="dash" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Dashboard" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="cal" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Calendar" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="pos" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="POS / Checkout" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="clients-v" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Clients" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="staff-v" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Staff" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="invent-v" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Inventory" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="report-v" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Reports" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="settings-v" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Settings" vertex="1">
+          <mxGeometry height="50" width="120" x="620" y="520" as="geometry" />
+        </mxCell>
+        <!-- Store to views edges -->
+        <mxCell id="edge-dash" edge="1" parent="1" source="store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.1;exitDx=0;exitDy=0;" target="dash">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Router -->
+        <mxCell id="router" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Router&lt;br&gt;(React Router)" vertex="1">
+          <mxGeometry height="60" width="100" x="300" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-store-router" edge="1" parent="1" source="store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="router">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Router to views -->
+        <mxCell id="edge-router-cal" edge="1" parent="1" source="router" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- PWA / Service Worker -->
+        <mxCell id="pwa" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="PWA Service Worker&lt;br&gt;(Offline Shell + Sync)" vertex="1">
+          <mxGeometry height="50" width="140" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-pwa-apiclient" edge="1" parent="1" source="pwa" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="api-client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

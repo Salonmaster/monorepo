@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/venv/bin/activate && conan build ${workspaceFolder} --build=missing",
+            "problemMatcher": [],
+            "detail": "Build the project using Conan",
+            "group": "build",
+            "presentation": {
+                "close": true
+            }
+        },
+        { 
+            "label": "migrate",
+            "type": "shell",
+            "command": "source ${workspaceFolder}/venv/bin/activate && cd ${workspaceFolder}/database && CONFIG_JSON_PATH=${workspaceFolder}/config.json alembic upgrade head",
+            "presentation": {
+                "close": true
+            }
+        },
+        {
+            "label": "build-and-migrate",
+            "dependsOn": ["build", "migrate"],
+            "dependsOrder": "parallel",
+            "problemMatcher": [],
+            "detail": "Run build and migrate tasks in parallel",
+            "presentation": {
+                "close": true
+            }
+        }
+    ]
+}

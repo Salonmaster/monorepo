@@ -1,0 +1,50 @@
+gitUrl: git@github.com:Salonmaster/Kubernetes.git
+appsPath: apps/
+
+env: tst
+
+apps:
+  - name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
+    values: values-tst.yaml
+    autosync: true
+
+  - name: external-secrets
+    namespace: external-secrets
+    values: values-tst.yaml
+    autosync: true
+
+  - name: cloudflare
+    namespace: cloudflare
+    values: values-tst.yaml
+    autosync: true
+
+  - name: keycloak
+    namespace: keycloak
+    values: values-tst.yaml
+    autosync: true
+
+  - name: website
+    namespace: website
+    values: values-tst.yaml
+    autosync: true
+
+  - name: database-system
+    namespace: database-system
+    values: values-tst.yaml
+    autosync: true
+
+  - name: monitoring
+    namespace: monitoring
+    values: values-tst.yaml
+    autosync: true
+
+  # - name: cilium
+  #   namespace: cilium
+  #   values: values-tst.yaml
+  #   autosync: true
+
+  - name: vault
+    namespace: vault
+    values: values-tst.yaml
+    autosync: true

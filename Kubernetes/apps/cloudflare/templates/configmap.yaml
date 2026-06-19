@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+  namespace: {{ .Release.Namespace }}
+data:
+  config.yaml: |
+    tunnel: 09935331-c948-4852-96fb-4a50e2838b60
+    credentials-file: /etc/cloudflared/credentials.json
+    origincert: /etc/cloudflared/cert.pem
+
+    ingress:
+{{ toYaml .Values.ingress | indent 6 }}
+

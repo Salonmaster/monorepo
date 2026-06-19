@@ -1,0 +1,18 @@
+creation_rules:
+  - path_regex: '.*values-tst.enc\.yaml$'
+    encrypted_regex: '(?i)(password|token|sshPrivateKey|keyFile|base64EncodedConfigJsonFile|base64EncodedPemFile)'
+    key_groups:
+      - age:
+          - age1yfnyydqk86et5jejvhtp4gewz8q9z3ukh603y8hslede7tq60c3q6yts0s  # TST
+
+  - path_regex: '.*values-acc\.yaml$'
+    encrypted_regex: '(?i)(password|token|sshPrivateKey|keyFile|base64EncodedConfigJsonFile|base64EncodedPemFile)'
+    key_groups:
+      - age:
+          - age12k35cz3hgyeqw4dxu07mp6f3ak0g7jtufvsyc5mfqsncrscgdy5sl9jm30  # ACC
+
+  - path_regex: '.*values-prd\.yaml$'
+    encrypted_regex: '(?i)(password|token|sshPrivateKey|keyFile|base64EncodedConfigJsonFile|base64EncodedPemFile)'
+    key_groups:
+      - age:
+          - age1p38feyqdwenw9l50uavrdc4fep7jt5cera7rzjydt08kmkxzcvhqkgy706  # PRD

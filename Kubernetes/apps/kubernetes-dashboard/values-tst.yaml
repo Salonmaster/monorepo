@@ -1,0 +1,27 @@
+oauth2-proxy:
+  config:
+    existingSecret: oauth2-proxy-secret
+  extraEnv:
+    - name: OAUTH2_PROXY_PROVIDER
+      value: keycloak-oidc
+    - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+      value: https://auth.tst.salonmaster.dev/realms/master
+    - name: OAUTH2_PROXY_CODE_CHALLENGE_METHOD
+      value: S256
+    - name: OAUTH2_PROXY_REDIRECT_URI
+      value: https://dashboard.tst.salonmaster.dev/oauth2/callback
+    - name: OAUTH2_PROXY_INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL
+      value: "true"
+    - name: OAUTH2_PROXY_SSL_UPSTREAM_INSECURE_SKIP_VERIFY
+      value: "true"
+    - name: OAUTH2_PROXY_UPSTREAMS
+      value: "https://{{.Release.Name}}-kong-proxy"
+    - name: OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER
+      value: "true"
+    - name: OAUTH2_PROXY_SKIP_PROVIDER_BUTTON
+      value: "true"
+    - name: OAUTH2_PROXY_SKIP_AUTH_STRIP_HEADERS
+      value: "true"
+    - name: OAUTH2_PROXY_EXTRA_HEADERS
+      value: |
+        Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InJFVl9sWFpqa2hrN1JqR2o4aWs3S2tJc0FHN1N5YXlrZ0ZLQ19BcTc0c28ifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiLCJrM3MiXSwiZXhwIjoxNzU0NjA3MjIwLCJpYXQiOjE3NTQ2MDM2MjAsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiM2QwY2E4ZDUtMDY4ZS00NGUwLTlhZGUtZDJmYzg4MTdkMmRhIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsInNlcnZpY2VhY2NvdW50Ijp7Im5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tc2EiLCJ1aWQiOiJjMDgxOWVlMS01YTI2LTRlNzYtYWE1OC02ZDFiNjU5OWUzOWEifX0sIm5iZiI6MTc1NDYwMzYyMCwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmVybmV0ZXMtZGFzaGJvYXJkOmRhc2hib2FyZC1hZG1pbi1zYSJ9.Sflkd8WWxlPcnNC4QXlfAe9l-Kt0wOsqtRsdDj_jR_OH--ESD_tc-7Fysjlt4TjSgdzXqntj-U_71AxZdhKxHR-QpPhJiCH_qhjf8kKIhICBFnxMImbadfRSSgR7FbAFrQ9h9DKAxyOxW8RbFbtgZazMsk0R8Byo98HlqFtBgklM_9iaaVl8uJ5JUKpQKdOef3VUKm45zzh6M_ce5tJB371wtSzalOYhIxZgbVHqDQZk1y94046kP9kUTkdJ2JM3GsA_c2RNPB2qhPy9vKgD_sWCD9KYr0ttYsIM_w6RQPJSOGri0K5HpVfaf6xFF2Hl2G7RWEO8pFjJ7Au4eq7U1Q

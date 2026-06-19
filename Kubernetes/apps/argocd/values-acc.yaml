@@ -1,0 +1,65 @@
+argo-cd:
+    redis-ha:
+        enabled: true
+        redis:
+            resources:
+                requests:
+                    cpu: 50m
+                    memory: 128Mi
+                limits:
+                    cpu: 200m
+                    memory: 256Mi
+        sentinel:
+            resources:
+                requests:
+                    cpu: 50m
+                    memory: 64Mi
+                limits:
+                    cpu: 100m
+                    memory: 128Mi
+    controller:
+        replicas: 1
+        resources:
+            requests:
+                cpu: 50m
+                memory: 256Mi
+            limits:
+                cpu: 500m
+                memory: 512Mi
+    syncPolicy:
+        apply:
+            force: true
+            serverSide: true
+    server:
+        autoscaling:
+            enabled: true
+            minReplicas: 1
+        resources:
+            requests:
+                cpu: 50m
+                memory: 256Mi
+            limits:
+                cpu: 500m
+                memory: 512Mi
+    repoServer:
+        autoscaling:
+            enabled: true
+            minReplicas: 1
+        resources:
+            requests:
+                cpu: 50m
+                memory: 256Mi
+            limits:
+                cpu: 500m
+                memory: 512Mi
+    applicationSet:
+        replicas: 1
+        resources:
+            requests:
+                cpu: 50m
+                memory: 128Mi
+            limits:
+                cpu: 200m
+                memory: 256Mi
+    global:
+        domain: argocd.salonmaster.dev

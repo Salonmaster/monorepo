@@ -1,0 +1,90 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="SalonMaster Global System" id="sm-global">
+    <mxGraphModel dx="1438" dy="840" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- PostgreSQL Database -->
+        <mxCell id="db-pg" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;" value="PostgreSQL&lt;br&gt;Primary Database" vertex="1">
+          <mxGeometry height="80" width="80" x="120" y="300" as="geometry" />
+        </mxCell>
+        <!-- Redis -->
+        <mxCell id="db-redis" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;verticalAlign=top;labelPosition=center;verticalLabelPosition=bottom;align=center;" value="Redis&lt;br&gt;Cache/Queue" vertex="1">
+          <mxGeometry height="80" width="80" x="220" y="300" as="geometry" />
+        </mxCell>
+        <!-- API Server -->
+        <mxCell id="srv-api" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;" value="SalonMaster&lt;br&gt;API Server" vertex="1">
+          <mxGeometry height="120" width="120" x="380" y="354" as="geometry" />
+        </mxCell>
+        <!-- DB to API -->
+        <mxCell id="edge-db-api" edge="1" parent="1" source="db-pg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;startArrow=classic;startFill=1;" target="srv-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-redis-api" edge="1" parent="1" source="db-redis" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;startArrow=classic;startFill=1;" target="srv-api">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="260" y="280"/><mxPoint x="440" y="280"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <!-- Auth Providers -->
+        <mxCell id="auth-local" parent="1" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.user;" value="Local Auth&lt;br&gt;(JWT)" vertex="1">
+          <mxGeometry height="50" width="50" x="550" y="174" as="geometry" />
+        </mxCell>
+        <mxCell id="auth-oidc" parent="1" style="shape=mxgraph.sap.icon;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;strokeWidth=1;strokeColor=#D5DADD;fillColor=#EDEFF0;gradientColor=#FCFCFC;gradientDirection=west;aspect=fixed;" value="OAuth2/SSO" vertex="1">
+          <mxGeometry height="50" width="50" x="410" y="167" as="geometry" />
+        </mxCell>
+        <!-- Auth to API -->
+        <mxCell id="edge-auth-api" edge="1" parent="1" source="auth-local" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" target="srv-api">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="575" y="290"/><mxPoint x="440" y="290"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-oidc-api" edge="1" parent="1" source="auth-oidc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="srv-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- File Storage -->
+        <mxCell id="store-s3" parent="1" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.s3;fillColor=#E05243;gradientColor=none;" value="File Storage&lt;br&gt;(S3/Local)" vertex="1">
+          <mxGeometry height="93" width="76.5" x="480" y="561" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-store-api" edge="1" parent="1" source="store-s3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="srv-api">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="518" y="520"/><mxPoint x="440" y="520"/></Array>
+          </mxGeometry>
+        </mxCell>
+        <!-- Clients -->
+        <mxCell id="client-pos" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="POS Desk&lt;br&gt;(Tablet/PWA)" vertex="1">
+          <mxGeometry height="60" width="90" x="640" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="client-staff" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Staff App&lt;br&gt;(Phone)" vertex="1">
+          <mxGeometry height="60" width="90" x="640" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="client-booking" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Booking&lt;br&gt;(Web Widget)" vertex="1">
+          <mxGeometry height="60" width="90" x="640" y="310" as="geometry" />
+        </mxCell>
+        <!-- Client to API edges -->
+        <mxCell id="edge-pos-api" edge="1" parent="1" source="client-pos" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;" target="srv-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-staff-api" edge="1" parent="1" source="client-staff" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;" target="srv-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-booking-api" edge="1" parent="1" source="client-booking" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;" target="srv-api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- External -->
+        <mxCell id="ext-sms" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="SMS Gateway&lt;br&gt;(Twilio)" vertex="1">
+          <mxGeometry height="60" width="90" x="640" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="ext-pay" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Payment&lt;br&gt;(Stripe/SumUp)" vertex="1">
+          <mxGeometry height="60" width="90" x="640" y="570" as="geometry" />
+        </mxCell>
+        <!-- API to External edges -->
+        <mxCell id="edge-api-ext1" edge="1" parent="1" source="srv-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;startArrow=classic;startFill=1;" target="ext-sms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-api-ext2" edge="1" parent="1" source="srv-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;startArrow=classic;startFill=1;" target="ext-pay">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

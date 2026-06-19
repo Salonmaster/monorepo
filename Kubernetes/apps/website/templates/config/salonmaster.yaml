@@ -1,0 +1,136 @@
+# This ConfigMap is just a way to define the cloudflared config.yaml file in k8s.
+# It's useful to define it in k8s, rather than as a stand-alone .yaml file, because
+# this lets you use various k8s templating solutions (e.g. Helm charts) to
+# parameterize your config, instead of just using string literals.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-website
+data:
+  .env: |
+    APP_NAME=Salonmaster
+    APP_ENV=local
+    APP_KEY=base64:qoviA4axHIUMk1808VCLmC1Sy+CQTlt5/6LPhQNCP+E=
+    APP_DEBUG=true
+    APP_URL=https://www.salonmaster.nl
+
+    DB_CONNECTION=pgsql
+    DB_HOST={{ .Release.Name }}-postgresql
+    DB_DATABASE=website
+    DB_USERNAME=website
+
+    KEYCLOAK_CLIENT_ID=Website
+    KEYCLOAK_CLIENT_SECRET=24EbZelXvGuB0OFq5IEw10ZbeLLetSIe
+    KEYCLOAK_REDIRECT_URI=https://www.salonmaster.nl/login/keycloak/callback
+    KEYCLOAK_BASE_URL=https://auth.salonmaster.nl
+    
+    LOG_CHANNEL=stderr
+    SYSLOG_HOST={{ .Release.Name }}-fluent-bit
+    SYSLOG_PORT=5140
+    LOG_DEPRECATIONS_CHANNEL=null
+    LOG_LEVEL=debug
+
+    BROADCAST_DRIVER=log
+    CACHE_DRIVER=redis
+    FILESYSTEM_DISK=local
+    QUEUE_CONNECTION=redis
+    
+    SESSION_DRIVER=redis
+    SESSION_LIFETIME=120
+    SESSION_CONNECTION=session
+
+    MEMCACHED_HOST=127.0.0.1
+
+    REDIS_HOST={{ .Release.Name }}-redis   
+
+    MAIL_MAILER=smtp
+    MAIL_HOST=localhost
+    MAIL_PORT=25
+    MAIL_USERNAME=null
+    MAIL_PASSWORD=null
+    MAIL_ENCRYPTION=null
+    MAIL_FROM_ADDRESS="noreply@salonmaster.nl"
+    MAIL_FROM_NAME="${APP_NAME}"
+
+    AWS_ACCESS_KEY_ID=
+    AWS_SECRET_ACCESS_KEY=
+    AWS_DEFAULT_REGION=us-east-1
+    AWS_BUCKET=
+    AWS_USE_PATH_STYLE_ENDPOINT=false
+
+    PUSHER_APP_ID=
+    PUSHER_APP_KEY=
+    PUSHER_APP_SECRET=
+    PUSHER_HOST=
+    PUSHER_PORT=443
+    PUSHER_SCHEME=https
+    PUSHER_APP_CLUSTER=mt1
+
+    VITE_APP_NAME="${APP_NAME}"
+    VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+    VITE_PUSHER_HOST="${PUSHER_HOST}"
+    VITE_PUSHER_PORT="${PUSHER_PORT}"
+    VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
+    VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+  nginx.conf: |
+    error_log syslog:server={{ .Release.Name }}-fluent-bit:5140 debug;
+
+    worker_processes                1;
+
+    pid                             /tmp/nginx.pid;
+
+    events {
+        worker_connections          1024;
+    }
+
+    http {
+        include                     /etc/nginx/mime.types;
+        default_type                application/octet-stream;
+        sendfile                    on;
+        keepalive_timeout           3000;
+
+        access_log syslog:server={{ .Release.Name }}-fluent-bit:5140,facility=local7,tag=nginx,severity=debug combined;
+        client_body_temp_path /tmp/nginx 1 2;
+        proxy_temp_path /tmp/nginx 1 2;
+        fastcgi_temp_path /tmp/nginx 1 2;
+        uwsgi_temp_path /tmp/nginx 1 2;
+        scgi_temp_path /tmp/nginx 1 2;
+        set_real_ip_from  10.0.0.0/8;
+        real_ip_header    X-Forwarded-For;
+        real_ip_recursive on;
+
+
+        server {
+            listen 8080;
+            listen [::]:8080;
+            server_name salonmaster.nl;
+            root /www/public;
+
+            add_header X-Frame-Options "SAMEORIGIN";
+            add_header X-Content-Type-Options "nosniff";
+            index index.php;
+
+            charset utf-8;
+
+            location / {
+                try_files $uri $uri/ /index.php?$query_string;
+            }
+
+            location = /favicon.ico { access_log off; log_not_found off; }
+            location = /robots.txt  { access_log off; log_not_found off; }
+
+            error_page 404 /index.php;
+
+            location ~ \.php$ {
+                try_files $uri =404;
+                include /etc/nginx/fastcgi_params;
+                fastcgi_pass    127.0.0.1:9000;
+                fastcgi_index   index.php;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            }
+
+            location ~ /\.(?!well-known).* {
+                deny all;
+            }
+        }
+    }

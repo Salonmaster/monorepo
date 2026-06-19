@@ -1,0 +1,1 @@
+<a class="btn fw-500 ms-lg-4 btn-danger" href="{{ route('logout') }}">Uitloggen</a>

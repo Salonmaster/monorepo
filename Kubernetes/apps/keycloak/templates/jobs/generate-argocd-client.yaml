@@ -1,0 +1,131 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: generate-argocd-client
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: kcadm
+          image: bitnami/keycloak:24.0.3
+          command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://keycloak-metrics.keycloak.svc.cluster.local:9000)" -eq 200 ]; do
+                echo "Waiting for Keycloak..."
+                sleep 5
+              done
+
+              echo "Logging in..."
+              /opt/bitnami/keycloak/bin/kcadm.sh config credentials \
+                --server http://keycloak.keycloak.svc.cluster.local \
+                --realm master \
+                --user user \
+                --password "$KEYCLOAK_ADMIN_PASSWORD"
+
+              # Ensure group argo-admins exists
+              ARGO_GROUP_ID=$(/opt/bitnami/keycloak/bin/kcadm.sh get groups -r master --fields name,id \
+                | grep -B1 '"name" : "argo-admins"' | grep '"id"' | awk -F'"' '{print $4}' || true)
+              if [ -z "${ARGO_GROUP_ID:-}" ]; then
+                echo "Creating group argo-admins..."
+                /opt/bitnami/keycloak/bin/kcadm.sh create groups -r master -s name=argo-admins >/dev/null
+              fi
+
+              # Ensure client scope "groups" exists (with Group Membership mapper)
+              GROUP_SCOPE_ID=$(/opt/bitnami/keycloak/bin/kcadm.sh get client-scopes -r master --fields name,id \
+                | grep -B1 '"name" : "groups"' | grep '"id"' | awk -F'"' '{print $4}' || true)
+
+              if [ -z "${GROUP_SCOPE_ID:-}" ]; then
+                echo "Creating client scope 'groups'..."
+                GROUP_SCOPE_ID=$(/opt/bitnami/keycloak/bin/kcadm.sh create client-scopes -r master \
+                  -s name=groups \
+                  -s protocol=openid-connect \
+                  -i)
+
+                echo "Adding Group Membership mapper to 'groups' scope..."
+                /opt/bitnami/keycloak/bin/kcadm.sh create client-scopes/$GROUP_SCOPE_ID/protocol-mappers/models -r master \
+                  -s name=groups \
+                  -s protocol=openid-connect \
+                  -s protocolMapper=oidc-group-membership-mapper \
+                  -s 'config."full.path"=false' \
+                  -s 'config."id.token.claim"=true' \
+                  -s 'config."access.token.claim"=true' \
+                  -s 'config."claim.name"=groups' \
+                  -s 'config."userinfo.token.claim"=true' >/dev/null
+              fi
+
+              # Create or update the ArgoCD client
+              echo "Upserting client..."
+              EXISTING_CLIENT_ID=$(/opt/bitnami/keycloak/bin/kcadm.sh get clients -r master --fields clientId,id \
+                | grep -B1 "\"clientId\" : \"$CLIENT_ID\"" | grep '"id"' | awk -F'"' '{print $4}' || true)
+
+              CALLBACK_URL="https://argocd.tst.salonmaster.dev/*"
+              ORIGIN_URL="https://argocd.tst.salonmaster.dev"
+
+              if [ -z "${EXISTING_CLIENT_ID:-}" ]; then
+                echo "Creating client $CLIENT_ID..."
+                ARGO_CLIENT_ID=$(/opt/bitnami/keycloak/bin/kcadm.sh create clients -r master \
+                  -s clientId="$CLIENT_ID" \
+                  -s enabled=true \
+                  -s secret="$CLIENT_SECRET" \
+                  -s publicClient=false \
+                  -s protocol=openid-connect \
+                  -s standardFlowEnabled=true \
+                  -s directAccessGrantsEnabled=false \
+                  -s 'redirectUris=["'"$CALLBACK_URL"'"]' \
+                  -s 'webOrigins=["'"$ORIGIN_URL"'"]' \
+                  -i)
+              else
+                echo "Updating client $CLIENT_ID (id=$EXISTING_CLIENT_ID)..."
+                /opt/bitnami/keycloak/bin/kcadm.sh update clients/$EXISTING_CLIENT_ID -r master \
+                  -s enabled=true \
+                  -s secret="$CLIENT_SECRET" \
+                  -s publicClient=false \
+                  -s protocol=openid-connect \
+                  -s standardFlowEnabled=true \
+                  -s directAccessGrantsEnabled=false \
+                  -s 'redirectUris=["'"$CALLBACK_URL"'"]' \
+                  -s 'webOrigins=["'"$ORIGIN_URL"'"]' >/dev/null
+                ARGO_CLIENT_ID="$EXISTING_CLIENT_ID"
+              fi
+
+              # Assign "groups" as a default client scope to the Argo client (idempotent)
+              if [ -n "${GROUP_SCOPE_ID:-}" ]; then
+                echo "Linking default client scope 'groups' (id=$GROUP_SCOPE_ID) to client (id=$ARGO_CLIENT_ID)..."
+                /opt/bitnami/keycloak/bin/kcadm.sh create clients/$ARGO_CLIENT_ID/default-client-scopes/$GROUP_SCOPE_ID -r master >/dev/null || true
+              else
+                echo "WARNING: 'groups' client scope ID not found; skipping default scope link." >&2
+              fi
+
+              echo "Done."
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /home/keycloak
+          env:
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-credentials
+                  key: admin-password
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: argocd-credentials
+                  key: client-id
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: argocd-credentials
+                  key: client-secret
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}

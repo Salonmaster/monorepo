@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: generate-oauth2-proxy-client
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: kcadm
+          image: bitnami/keycloak:24.0.3
+          command:
+            - bash
+            - -c
+            - |
+              until [ "$(curl -s -o /dev/null -w '%{http_code}' http://keycloak-metrics.keycloak.svc.cluster.local:9000)" -eq 200 ]; do
+                echo "Waiting for Keycloak..."
+                sleep 5
+              done
+
+              echo $KEYCLOAK_ADMIN_PASSWORD
+
+              echo "Logging in..."
+              /opt/bitnami/keycloak/bin/kcadm.sh config credentials \
+                --server http://keycloak.keycloak.svc.cluster.local \
+                --realm master \
+                --user user \
+                --password $KEYCLOAK_ADMIN_PASSWORD
+
+              echo "Creating client..."
+              /opt/bitnami/keycloak/bin/kcadm.sh create clients -r master \
+                -s clientId="$CLIENT_ID" \
+                -s enabled=true \
+                -s secret="$CLIENT_SECRET" \
+                -s publicClient=false \
+                -s protocol=openid-connect \
+                -s standardFlowEnabled=true \
+                -s redirectUris='["https://dashboard.tst.salonmaster.dev/*"]' || true
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /home/keycloak
+          env:
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-credentials
+                  key: admin-password
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-credentials
+                  key: client-id
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy-credentials
+                  key: client-secret
+
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}

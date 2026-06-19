@@ -1,0 +1,21 @@
+  postgresql:
+  auth:
+    database: postgres
+    existingSecret: cluster-credentials
+    secretKeys:
+      userPasswordKey: password
+  resources:
+    requests:
+      cpu: 2000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 4Gi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      labels:
+        release: monitoring
+test: {}

@@ -1,0 +1,34 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Packer
+packer_cache/
+*.pkrvars.hcl
+
+# Sensitive files
+*.pem
+*.key
+*.crt
+*.kubeconfig
+k3s_kubeconfig.yaml
+k3s_kustomization_backup.yaml
+
+# OS/Editor
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.tmp
+.idea/
+.vscode/

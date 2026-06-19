@@ -1,0 +1,34 @@
+build/
+uploads/
+config.json
+
+# Conan
+conanbuildinfo.*
+conaninfo.txt
+.conan/
+*.conan
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+.env
+.venv
+venv/
+ENV/
+env/
+*.sqlite3
+*.log
+.mypy_cache/
+.pytest_cache/
+.coverage
+.tox/
+.cache/
+.idea/
