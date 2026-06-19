@@ -114,41 +114,45 @@ HEREDOC_END
             }
         }
 
-        stage('Backend - Build') {
-            steps {
-                dir('Backend') {
-                    sh 'docker build -t salonmaster-backend .'
+        stage('Build') {
+            stages {
+                stage('Backend - Build') {
+                    steps {
+                        dir('Backend') {
+                            sh 'docker build -t salonmaster-backend .'
+                        }
+                    }
+                    post {
+                        success {
+                            sh '''
+                                docker run --rm \
+                                    -v /var/run/docker.sock:/var/run/docker.sock:Z \
+                                    aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 salonmaster-backend:latest || true
+                            '''
+                        }
+                    }
                 }
-            }
-            post {
-                success {
-                    sh '''
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock:Z \
-                            aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 salonmaster-backend:latest || true
-                    '''
-                }
-            }
-        }
 
-        stage('Website - Build') {
-            steps {
-                dir('Website') {
-                    sh 'docker build -t salonmaster-website .'
+                stage('Website - Build') {
+                    steps {
+                        dir('Website') {
+                            sh 'docker build -t salonmaster-website .'
+                        }
+                    }
                 }
-            }
-        }
 
-        stage('Docs - Build') {
-            steps {
-                sh '''
-                    docker run --rm \
-                        -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
-                        pip install poetry && \
-                        poetry install --no-root && \
-                        poetry run mkdocs build --strict
-                    "
-                '''
+                stage('Docs - Build') {
+                    steps {
+                        sh '''
+                            docker run --rm \
+                                -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
+                                pip install poetry && \
+                                poetry install --no-root && \
+                                poetry run mkdocs build --strict
+                            "
+                        '''
+                    }
+                }
             }
         }
 
