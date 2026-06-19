@@ -34,20 +34,21 @@ pipeline {
                     }
                 }
 
-                stage('Docs - Lint') {
+                stage('Docs - Lint & Audit') {
                     steps {
                         sh '''
                             docker run --rm \
                                 -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
-                                pip install poetry && \
+                                pip install poetry pip-audit && \
                                 poetry install --no-root && \
-                                poetry run ruff check .
+                                poetry run ruff check . && \
+                                pip-audit
                             "
                         '''
                     }
                 }
 
-                stage('Kubernetes - Lint') {
+                stage('Kubernetes - Lint & Audit') {
                     steps {
                         sh '''
                             docker run -i --rm \
@@ -64,16 +65,17 @@ for chart in apps/*/; do
     fi
 done
 
-pip install poetry
+pip install poetry pip-audit
 poetry install --no-root --with dev
 poetry run ruff check stylist/
 poetry run pytest
+pip-audit
 HEREDOC_END
                         '''
                     }
                 }
 
-                stage('Terraform - Validate') {
+                stage('Terraform - Validate & Scan') {
                     steps {
                         sh '''
                             docker run --rm \
@@ -84,16 +86,22 @@ HEREDOC_END
                                 terraform validate
                             "
                         '''
+                        sh '''
+                            docker run --rm \
+                                -v "$PWD/Terraform:/work:Z" -w /work \
+                                aquasec/trivy:latest config --severity HIGH,CRITICAL --exit-code 0 /work
+                        '''
                     }
                 }
 
-                stage('Website - Lint') {
+                stage('Website - Lint & Audit') {
                     steps {
                         sh '''
                             docker run --rm \
                                 -v "$PWD/Website:/app:Z" -w /app composer:2 sh -c "
                                 composer install --no-interaction --prefer-dist && \
-                                ./vendor/bin/pint --test
+                                ./vendor/bin/pint --test && \
+                                composer audit
                             "
                         '''
                     }
@@ -105,6 +113,15 @@ HEREDOC_END
             steps {
                 dir('Backend') {
                     sh 'docker build -t salonmaster-backend .'
+                }
+            }
+            post {
+                success {
+                    sh '''
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 salonmaster-backend:latest
+                    '''
                 }
             }
         }
