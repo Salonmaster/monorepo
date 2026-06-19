@@ -21,6 +21,7 @@ theme:
 
 nav:
   - Welcome: index.md
+  - AI Assistant: ai-assistant.md
   - Getting Started:
       - Quick Start: getting-started/quick-start.md
       - Setting Up Your Salon: getting-started/setup.md

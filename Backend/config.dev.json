@@ -74,6 +74,10 @@
     }
   ],
   "custom_config": {
+    "ai": {
+      "deepseek_api_key": "${DEEPSEEK_API_KEY}",
+      "model": "deepseek-chat"
+    },
     "keycloak": {
       "client_id": "salonmaster-backend",
       "client_secret": "",
