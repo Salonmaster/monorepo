@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Backend (C++ Drogon) ──
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build Backend/
+
+  # ── Client (Flutter) ──
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: cd Client && flutter pub get && flutter analyze && flutter test
+
+  # ── Docs (MkDocs) ──
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: cd Docs && pip install poetry && poetry install && poetry run mkdocs build --strict
+
+  # ── Kubernetes (Helm + Stylist) ──
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: azure/setup-helm@v4
+      - run: cd Kubernetes && helm lint apps/*/ --quiet
+      - run: cd Kubernetes && pip install poetry && poetry install && poetry run pytest
+
+  # ── Terraform ──
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: cd Terraform && terraform fmt -check -recursive
+      - run: cd Terraform && terraform init -backend=false && terraform validate
+
+  # ── Website (Laravel) ──
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - run: cd Website && composer install --no-interaction --prefer-dist && php artisan lint
