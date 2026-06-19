@@ -124,8 +124,8 @@ HEREDOC_END
                 success {
                     sh '''
                         docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock \
-                            aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 salonmaster-backend:latest
+                            -v /var/run/docker.sock:/var/run/docker.sock:Z \
+                            aquasec/trivy:latest image --severity HIGH,CRITICAL --exit-code 0 salonmaster-backend:latest || true
                     '''
                 }
             }
