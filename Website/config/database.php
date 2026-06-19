@@ -135,10 +135,10 @@ return [
                 'stream' => [
                     'verify_peer' => true,
                     'cafile' => '/etc/certificates/redis-ca.crt',
-                    'verify_peer_name' => false
+                    'verify_peer_name' => false,
                 ],
             ],
-            
+
             'scheme' => 'tls',
         ],
 

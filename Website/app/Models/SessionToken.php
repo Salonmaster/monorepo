@@ -16,8 +16,8 @@ class SessionToken extends Model
         'refresh_token',
     ];
 
-    public function user() {
+    public function user()
+    {
         return $this->hasOne(User::class);
     }
-
 }

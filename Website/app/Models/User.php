@@ -46,7 +46,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
-    public function session_tokens() {
+    public function session_tokens()
+    {
         return $this->hasMany(SessionToken::class);
     }
 

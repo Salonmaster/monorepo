@@ -13,6 +13,7 @@ class ForgotPassword extends Component
     public $email;
 
     public $failed = false;
+
     public $succeeded = false;
 
     #[Layout('auth.components.layout')]

@@ -129,7 +129,7 @@ return [
             'with' => [
                 'host' => env('SYSLOG_HOST', 'localhost'),
                 'port' => env('SYSLOG_PORT', 'localhost'),
-                'rfc' => SyslogUdpHandler::RFC3164
+                'rfc' => SyslogUdpHandler::RFC3164,
             ],
         ],
 
