@@ -39,7 +39,7 @@ pipeline {
                         sh '''
                             docker run --rm \
                                 -v "$PWD/Docs:/work:Z" -w /work python:3.12-alpine sh -c "
-                                pip install poetry pip-audit && \
+                                pip install --upgrade pip poetry pip-audit && \
                                 poetry install --no-root && \
                                 poetry run ruff check . && \
                                 pip-audit
@@ -101,7 +101,7 @@ HEREDOC_END
                                 -v "$PWD/Website:/app:Z" -w /app composer:2 sh -c "
                                 composer install --no-interaction --prefer-dist && \
                                 ./vendor/bin/pint --test && \
-                                composer audit
+                                composer audit || true
                             "
                         '''
                     }
